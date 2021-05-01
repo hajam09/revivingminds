@@ -1,0 +1,52 @@
+{% extends "mainapp/base.html" %}
+{% load static %}
+{% block styling %}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<style type="text/css">
+    .overlay {
+    height: 7%;
+    }
+    #articleBody p {
+    	text-align: justify;
+    }
+
+</style>
+<main>
+    <section class="overview-wrap" id="overview">
+        <div class="container">
+            <div class="contenedor">
+                <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">{{category.name}}</h4>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="span9">
+                            <!-- Start Content -->
+                            <div id="rstpl-com_content" class="rstpl-content">
+                                <main id="main">
+                                    juu
+                                </main>
+                            </div>
+                            <!-- End Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    new WOW().init();
+</script>
+<script>
+    $(window).on("scroll", function() {
+    	if ($(this).scrollTop() > 10) {
+    		$("nav.navbar").addClass("mybg-dark");
+    		$("nav.navbar").addClass("navbar-shrink");
+    	} else {
+    		$("nav.navbar").removeClass("mybg-dark");
+    		$("nav.navbar").removeClass("navbar-shrink");
+    	}
+    });
+</script>
+{% endblock %}
