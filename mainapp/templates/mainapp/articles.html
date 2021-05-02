@@ -19,13 +19,14 @@
             <div class="contenedor">
                 <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">{{category.name}}</h4>
                 <div class="row">
-                    <div class="col-sm-12">
+                    <div class="">
                         <div class="span9">
                             <!-- Start Content -->
                             <div id="rstpl-com_content" class="rstpl-content">
-                                <main id="main">
-                                    juu
-                                </main>
+                                <section class="blog-wrap" id="blog">
+                                    <div class="container-fluid" id="div_id_list_of_all_articles_container">
+                                    </div>
+                                </section>
                             </div>
                             <!-- End Content -->
                         </div>
@@ -35,9 +36,9 @@
         </div>
     </section>
 </main>
-<script>
+<!-- <script>
     new WOW().init();
-</script>
+</script> -->
 <script>
     $(window).on("scroll", function() {
     	if ($(this).scrollTop() > 10) {
@@ -48,5 +49,69 @@
     		$("nav.navbar").removeClass("navbar-shrink");
     	}
     });
+
+    function displayArticles()
+    {
+
+        var rowIndex = 1;
+        var colIndex = 0;
+
+        {% if all_articles %}
+            var articleComponent = '';
+
+            {% for article in all_articles %}
+
+                {% if article.description|length > 160 %}
+
+                    var des = '{{ article.description|truncatechars:159 }}';
+
+                {% else %}
+
+                    var des = '{{ article.description }}';
+
+                {% endif %}
+
+                var newComonent = `
+                <div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
+                    <div class="card">
+                        <figure class="text-center">
+                            <img src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" class="img-fluid" height=650 width=940>
+                        </figure>
+                        <div class="card-body">
+                            
+                            <p class="card-text" style='text-align: justify;text-justify: inter-word;'>`+des+`</p>
+                            <a href="/info/{{article.category.slug}}/{{article.slug}}" class="">Read more</a>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                articleComponent = articleComponent + newComonent;
+
+                colIndex = colIndex + 1;
+
+                if (colIndex == 3) {
+                    $('#div_id_list_of_all_articles_container').append('<div class="row" id="article_i_container_'+rowIndex+'"></div>');
+                    $('#article_i_container_'+rowIndex).append(articleComponent);
+                    articleComponent = '';
+                    rowIndex = rowIndex + 1;
+                }
+
+
+            {% endfor %}
+
+            if (articleComponent != '') {
+                $('#div_id_list_of_all_articles_container').append('<div class="row" id="article_i_container_'+rowIndex+'"></div>');
+                $('#article_i_container_'+rowIndex).append(articleComponent);
+            }
+
+        {% endif %}
+    }
+
+    displayArticles();
+
+        
+
+
 </script>
 {% endblock %}

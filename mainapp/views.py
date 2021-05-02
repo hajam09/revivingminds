@@ -5,10 +5,11 @@ from mainapp.models import Article
 def mainpage(request):
 	return render(request, "mainapp/mainpage.html")
 
-def information(request, category, url):
+def article_page(request, category, article):
+	# article page
 	all_category = Category.objects.all()
 	article = Article.objects.get(
-		slug=url,
+		slug=article,
 		show=True
 	)
 	context = {
@@ -24,9 +25,10 @@ def create_article(request):
 	return render(request, "mainapp/create_article.html", context)
 
 def articles(request, category):
+	# list of all the articles
 	category = Category.objects.get(slug=category)
 	all_articles = Article.objects.filter(category=category, show=True)
-	print(all_articles)
+
 	context = {
 		"category": category,
 		"all_articles": all_articles

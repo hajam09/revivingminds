@@ -49,7 +49,7 @@
                                         <ul>
                                             {% for r in article.related_articles.all %}
                                             <li>
-                                                <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:information' category=r.category.slug url=r.slug %}">{{r.title|title}}</a>
+                                                <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>
                                             </li>
                                             {% endfor %}
                                         </ul>
