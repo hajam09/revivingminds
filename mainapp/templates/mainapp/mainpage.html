@@ -196,45 +196,8 @@
 	<section class="blog-wrap" id="blog">
 		<div class="container-fluid">
 			<h2 class="title-blog wow fadeInUp">The Articles</h2>
-			<p class="subtitle-blog wow fadeInUp">Lorem ipsum dolor sit amet consectetur adipiscing elit proin leo leo ornare nec vulputate tempus velit nam id purus tellus hendrerit mi dapibus</p>
-			<div class="row">
-				<div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
-					<div class="card">
-						<figure class="text-center">
-							<img src="https://images.pexels.com/photos/1432942/pexels-photo-1432942.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" class="img-fluid">
-						</figure>
-						<div class="card-body">
-							<h5 class="card-title">Lorem ipsum dolor sit amet</h5>
-							<p class="card-text">Lorem ipsum dolor sit amet consectetur adipiscing elit proin leo leo ornare nec vulputate tempus.</p>
-							<a href="#" class="">Read more</a>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
-					<div class="card">
-						<figure class="text-center">
-							<img src="https://images.pexels.com/photos/929831/pexels-photo-929831.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" class="img-fluid">
-						</figure>
-						<div class="card-body">
-							<h5 class="card-title">Lorem ipsum dolor sit amet</h5>
-							<p class="card-text">Lorem ipsum dolor sit amet consectetur adipiscing elit proin leo leo ornare nec vulputate tempus.</p>
-							<a href="#" class="">Read more</a>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
-					<div class="card">
-						<figure class="text-center">
-							<img src="https://images.pexels.com/photos/938965/pexels-photo-938965.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" class="img-fluid">
-						</figure>
-						<div class="card-body">
-							<h5 class="card-title">Lorem ipsum dolor sit amet</h5>
-							<p class="card-text">Lorem ipsum dolor sit amet consectetur adipiscing elit proin leo leo ornare nec vulputate tempus.</p>
-							<a href="#" class="">Read more</a>
-						</div>
-					</div>
-				</div>
-			</div>
+			<div class="container-fluid" id="div_id_the_articles_container">
+		</div>
 		</div>
 	</section>
 	<section class="cta contact-wrap" id="contact">
@@ -351,5 +314,64 @@
 			$("nav.navbar").removeClass("navbar-shrink");
 		}
 	});
+
+	function displayRandomArticles()
+	{
+		var rowIndex = 1;
+        var colIndex = 0;
+
+        {% if the_articles %}
+            var articleComponent = '';
+
+            {% for article in the_articles %}
+
+                {% if article.description|length > 140 %}
+
+                    var des = '{{ article.description|truncatechars:140 }}';
+
+                {% else %}
+
+                    var des = '{{ article.description }}';
+
+                {% endif %}
+
+                var newComonent = `
+                <div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
+					<div class="card">
+						<figure class="text-center">
+							<img src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" class="img-fluid" height=650 width=940>
+						</figure>
+						<div class="card-body">
+							<h6 style="font-weight: bold;" class="card-title">{{ article.title }}</h6>
+							<p class="card-text" style='text-align: justify;text-justify: inter-word;'>`+des+`</p>
+							<a href="/info/{{article.category.slug}}/{{article.slug}}" class="">Read more</a>
+						</div>
+					</div>
+				</div>
+                `;
+
+                articleComponent = articleComponent + newComonent;
+
+                colIndex = colIndex + 1;
+
+                if (colIndex == 3) {
+                    $('#div_id_the_articles_container').append('<div class="row" id="article_i_container_'+rowIndex+'"></div>');
+                    $('#article_i_container_'+rowIndex).append(articleComponent);
+                    articleComponent = '';
+                    rowIndex = rowIndex + 1;
+                }
+
+
+            {% endfor %}
+
+            if (articleComponent != '') {
+                $('#div_id_the_articles_container').append('<div class="row" id="article_i_container_'+rowIndex+'"></div>');
+                $('#article_i_container_'+rowIndex).append(articleComponent);
+            }
+
+        {% endif %}
+	}
+
+	displayRandomArticles();
 </script>
 {% endblock %}
