@@ -8,13 +8,15 @@ def mainpage(request):
 def article_page(request, category, article):
 	# article page
 	all_category = Category.objects.all()
+	recent_posts = Article.objects.all().order_by('-created_at')[:5]
 	article = Article.objects.get(
 		slug=article,
 		show=True
 	)
 	context = {
 		"all_category": all_category,
-		"article": article
+		"article": article,
+		"recent_posts": recent_posts
 	}
 	return render(request, "mainapp/information.html", context)
 
