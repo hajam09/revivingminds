@@ -1,8 +1,8 @@
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
-from account.models import Patient
-from account.models import Therapist
+from accounts.models import Patient
+from accounts.models import Therapist
 
 class Session(models.Model):
 	session_name = models.CharField(max_length=255)
@@ -23,8 +23,8 @@ theraphy, £380, 3
 
 class Appointment(models.Model):
 	patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    #OR
-    participants = models.ManyToManyField(Patient, related_name='appointment_participants') # check with this
+	#OR
+	participants = models.ManyToManyField(Patient, related_name='appointment_participants') # check with this
 	therapist = models.ForeignKey(Therapist, on_delete=models.CASCADE)
 	start_time = models.DateTimeField(auto_now=False, auto_now_add=False)
 	end_time = models.DateTimeField(auto_now=False, auto_now_add=False)
