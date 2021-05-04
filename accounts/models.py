@@ -12,3 +12,6 @@ class Patient(models.Model):
 
 class Therapist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+class Doctor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
