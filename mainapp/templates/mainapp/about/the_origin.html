@@ -5,110 +5,58 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
 <style type="text/css">
-    .overlay {
-    height: 7%;
-    }
-    #articleBody p {
-    	text-align: justify;
-    }
-
+	.overlay {
+	height: 7%;
+	}
+	#articleBody p {
+	text-align: justify;
+	}
 </style>
 <main>
-    <section class="overview-wrap" id="overview">
-        <div class="container">
-            <div class="contenedor">
-                <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">The Origin</h4>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="span9">
-                            <!-- Start Content -->
-                            <div id="rstpl-com_content" class="rstpl-content">
-                                <main id="main">
-                                    <div class="item-page rstpl-article-container" itemscope="" itemtype="http://schema.org/Article">
-                                        <br>
-                                        <div class="pull-left item-image">
-                                            <img style="width: 100%;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="" itemprop="image">
-                                        </div>
-                                        <div itemprop="articleBody" id="articleBody">
-                                            <p>&nbsp;</p>
-                                            <p>{{article.description|linebreaksbr}}</p>
-                                            <!-- It was one of those cold winter days of UK. I tried to hide myself in those cosy scarves and gloves sealing off my overcoat. I could hear my trendy high-heeled boots as I hurried up to my house. I was glad it helped me to keep my feet off the ground. Or else I thought I might have had a frostbite! The intense cold had already made me feel so pale.</p>
-                                                <p>No sooner I entered the house, I called at the helper, “Can I have a bowl of hot soup please?” The helper immediately returned my question, “With chicken or lamb?” I gasped, “Anything would do, but chicken soup could be prepared a bit quicker, so will have it!” My own words reverberated into my thoughts, “Looks like that was a good choice for the moment. I have heard soups are good for the cold, particularly chicken as it produces heat in the body, whereas lamb makes the body cool.</p>
-                                                <p>I silently smiled, “People think doctors are not supposed to believe in folk practices… but why not if it works?” My focus got more streamlined into the origin of Medicine itself. It is from the roots of such indigenous concepts, the modern medicine had its shoots.</p>
-                                                <p>Our body has several components, which need to be maintained such as blood, electrolytes, temperature, blood pressure, etc. The composition and the internal make up of these elements vary in their range and proportion. There is a fine equilibrium that is maintained between the components by the body itself. When this balance gets disturbed by internal or external causes, the body tries to adjust itself by ‘self-regulating’ the whole process, thus trying to bring back the stability. Or else it sends signals to the brain, which in turn commands us to act upon the requirement. This entire process is called as ‘<em>homeostasis</em>‘.</p>
-                                                <p>It is by the command of the brain that we feel thirsty on a hot day.&nbsp;We drink water so that the body gets sufficient water to feel refreshed again. When we get very tired, we fall asleep so that the constantly working brain cells can recuperate. On an intensely cold day like this, we wrap ourselves in coats and jumpers, so that we can keep ourselves warm from the outside. But then, where is my hot soup to keep myself more comfortable and feel the warmth internally? Just then it arrived perfectly to the synchrony of my thoughts.</p>
-                                                <p>As I took my sips, I further pondered how having a hot soup makes feel warm from the inside. I could relax a bit and wither off my gloves for the moment. I could sense how a simple strategy gets to restore the functioning and acts as a remedy. It is not only the concept of the modern science, but also the concept of four humours.</p>
-                                                <p>In fact the concept of four humours was the beginning on which medical developments were furthered. According to it, the body has four components, which are blood, phlegm, yellow bile and black bile. These components are proportioned within the body, which when tipped off will be self-regulated by the body itself. The stability can also be restored by having complementing substances such as soup. Even now, we could find similar terminologies being used across various traditions and cultures.</p>
-                                                <p>When we use what is available naturally as a remedy, it is called as a ‘<em>traditional therapy</em>‘ or a ‘<em>natural cure</em>‘. Interestingly, it is from these naturally available substances and products, science has progressed to marvel in its journey in establishing the perpetual treasures of the creation of human form and its constituents.</p>
-                                                <p>My thoughts traverse to the creation of human form, which in itself serves as a firm witness to the Magnificence of the Creator. <b>We look outside to the miracles of God. It is humbling to realise there are Allah’s Signs within us.</b></p>
-                                                <p><b><em>“On the earth are Signs for those of assured Faith. As also in your own selves: will you not then see?”</em></b></p>
-                                                <p><b><em>-The Glorious Qur’an 51: 20-21</em></b></p> -->
-                                            <p>&nbsp;</p>
-                                        </div>
-                                        {% if article.related_articles %}
-                                        <h5 class="rstpl-title">RELATED ARTICLES</h5>
-                                        <ul>
-                                            {% for r in article.related_articles.all %}
-                                            <li>
-                                                <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% endif %}
-                                    </div>
-                                </main>
-                            </div>
-                            <!-- End Content -->
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="rstpl-title">Recent Posts</h5>
-                                {% if recent_posts %}
-                                {% for r in recent_posts %}
-                                <div class="row">
-                                  <div class="col-3">
-                                    <img style="width: 50px; height: 50px; float: left; margin-right: 15px; margin-bottom: 15px;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="">
-                                  </div>
-                                  <div class="col-9">
-                                      <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>
-                                  </div>
-                                </div>
-
-                                {% endfor %}
-                                {% endif %}
-                            </div>
-                        </div>
-                        <br>
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="rstpl-title">Categories</h5>
-                                {% if all_category %}
-                                {% for c in all_category %}
-                                <br><a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:articles' c.slug %}">{{c.name|title}}</a>
-                                {% endfor %}
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<section class="overview-wrap" id="overview">
+		<div class="container">
+			<div class="contenedor">
+				<h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Disclaimer</h4>
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="span12  duration-500">
+							<div class="rspbld-text-block text-left rspbld-m-title">
+								<div class="rspbld-content">
+									<p style="text-align: justify;"><span style="padding-left: 30px; font-size: 28px;"><b>I</b></span>t was one fine afternoon, I was enjoying the spring -&nbsp;the freshness of the new leaves as they unfolded and the flowers as they slowly opened their petals. I almost forgot I had my final examination in about a few weeks, to obtain Membership of Royal College of Psychiatrists until I had my phone ringing continuously. It was from my close friend from the masjid (mosque), who used to conduct study circles. No sooner I greeted my friend, she rushed into the matter.</p>
+									<p style="text-align: justify;">My friend was referring someone to me urgently that can’t wait until I complete my examination. The referred lady Mrs L had made an appointment to terminate her pregnancy the next day quite advanced in her period of gestation. Until then I was called only to give presentations at the masjid and organised lectures for the public. This was my first client outside my routine work at NHS.</p>
+									<p style="text-align: justify;">There was not much history available about Mrs L, except that she had been very difficult in approaching and she had met with varied counsellors, family members, friends and ulema, but to no effect in her determination to continue with the termination of pregnancy. My friend was concerned if anything could help the situation as persuading Mrs L against termination had been going on for weeks. I offered to help and enquired if my friend would like to sit in at the consultation with Mrs L’s consent in case any translation to English would be needed. I was informed Mrs L would be accompanied by her close friend who would meet me. We agreed on to having the consultation that evening.</p>
+									<p style="text-align: justify;">Later that evening, I had set the place for consultation ready. As soon as the doorbell went off, I opened it to see two lovely ladies standing in their casuals. Mrs L introduced herself followed by her friend who had then put off her smoking quickly to introduce herself. Although the spring had come, the weather was still cold outside.</p>
+									<p style="text-align: justify;">I welcomed them both and led them to the consultation place. After making them feel comfortable, I started off my assessment with Mrs. L, obtaining the initial consent and detailing what I was doing. As I was proceeding with the initial complaint of wanting to terminate the pregnancy, I went into the details of it. I conducted an unbiased, non-judgmental comprehensive assessment from elaborate history taking all the way through physical symptoms, medical assessment, family, social and personal history, premorbid personality and mental state examination, along the risk assessment and formulation of the diagnosis or rather the actual problem.</p>
+									<p style="text-align: justify;">I could see Mrs L developed a trust almost immediately. The more she described what she was going through actually confirmed that she had been having symptoms of obsessive compulsive disorder. This had affected her personal everyday living as much as her family relationship. It came as comfort that her family including her husband and her friends had been supportive of her at all times. Mrs L’s concern was if she could have a child when she has this problem and if the problem might flair up after her pregnancy which could potentially become more distressing and harmful to her, the child and her family. Until then, she had been able to manage herself with no medical interventions and did not possess risk to herself and others. There were no physical signs of severity.</p>
+									<p style="text-align: justify;">I discussed the pros and cons of continuing the pregnancy and terminating it, in collaboration with Mrs L, getting Mrs L to elaborate on the possibilities of what might happen. The discussion of guilt evolved which could make OCD and the mental state worse, following termination. Mrs L decided that she would not terminate her pregnancy. In fact she was feeling more at ease to continue with her pregnancy when she understood the possibilities and confidently made her own decision.</p>
+									<p style="text-align: justify;">At this point of the consultation, I introduced Spirituality and approached the uncertainty of life using the discussion of having trust and reliance upon Allah (Tawakkul). It has been my style to discuss Spirituality, when it could be used to the benefit of the client. No sooner Mrs L heard these words, she started crying profusely. I was more interested in the reasons of her tears as much as her words of gratitude. I could sense she felt more reassured.</p>
+									<p style="text-align: justify;">Mrs L recounted that she had seen varied professionals who approached her problems and symptoms including OCD in a way that did not meet her demand and feeling of guilt was not identified that could arise due to her faith and beliefs. On the other hand, she felt reproached and rebuked by clerics, dismissing her mental state, saying it was all in the mind. She had no possibility of talking her heart out or elaborating on what she was thinking. Nobody knew what was that exact fear she had. She cried feebly, “I am not bad because I don’t wear the proper Islamic clothes nor I am mad because I have some problems in my mind.” She continued, “I would rather want someone who could understand both sides of me with no prejudice or being biased and tell me what will happen and how I could manage.” These words had left an everlasting imprints on my mind.</p>
+									<p style="text-align: justify;">This was just a beginning. In a few weeks, I had a lot more of people approaching that included children, adolescent problems, family conflicts, involvement of social and legal services, which took up a lot of time, concentration and also involved huge amount of administrative duties. In a few weeks or months, it started to outgrow the capacity I could handle.</p>
+									<p style="text-align: justify;">Interestingly, people approached for enhancing their spirituality such as to be able to pray regularly, wake up early, etc. I was approached by new and old reverts and people from the community, for whom I prepared psychospiritual proforma and CBT-styled worksheets (CBT – Cognitive Behavioural Therapy). It worked well and I was taken into deep amazement myself. These are again only a few examples. I was even approached by people of cleric order themselves, who were fascinated at what I was doing. Later, in a year’s time or so, I had been asked for life skills and personal and professional development training.</p>
+									<p style="text-align: justify;">RevivingMinds came into existence thus founded to efficiently prioritise and manage the consultations, constructing creative projects and accomplishing administrative works, thereby also being able to perform the tasks more systematically and ethically. In the course of its journey, it is certainly in in-depth gratitude to every single one of them who contributed to its vision and mission.</p>
+									<p style="text-align: justify;">It has endowed me with invaluable experience, very rewarding as much as getting to know varied things that matter in relevance to the re-building of homes and society amidst the joy and zest of creating new designs, evolving concepts and witnessing the desirable positive change in individuals and the families involved. It feels like a direct response from Allah to the supplication of being able to help and support the community besides my routine work.</p>
+									<p style="text-align: justify;">I&nbsp;sincerely wish and hope that its vision and mission are accomplished with more human resources and community support. At the moment, RevivingMinds has set an objective of publishing journals. It would be very helpful if the journals were forwarded to all your family, friends and acquaintances. It is for all people from all walks of life. Thus revivingminds came into existence, making valuable contribution to people’s lives in the community and far.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 </main>
 <script>
-    new WOW().init();
+	new WOW().init();
 </script>
 <script>
-    $(window).on("scroll", function() {
-    	if ($(this).scrollTop() > 10) {
-    		$("nav.navbar").addClass("mybg-dark");
-    		$("nav.navbar").addClass("navbar-shrink");
-    	} else {
-    		$("nav.navbar").removeClass("mybg-dark");
-    		$("nav.navbar").removeClass("navbar-shrink");
-    	}
-    });
+	$(window).on("scroll", function() {
+		if ($(this).scrollTop() > 10) {
+			$("nav.navbar").addClass("mybg-dark");
+			$("nav.navbar").addClass("navbar-shrink");
+		} else {
+			$("nav.navbar").removeClass("mybg-dark");
+			$("nav.navbar").removeClass("navbar-shrink");
+		}
+	});
 </script>
 {% endblock %}
