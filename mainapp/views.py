@@ -3,6 +3,11 @@ from mainapp.models import Category
 from mainapp.models import Article
 import random
 
+def nav_bar_pages(request, folder, page):
+	template = "mainapp/"+folder+"/"+page+".html"
+	return render(request, template)
+
+
 def mainpage(request):
 
 	items = list(Article.objects.filter(show=True))

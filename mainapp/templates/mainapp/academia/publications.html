@@ -1,0 +1,114 @@
+{% extends "mainapp/base.html" %}
+{% load static %}
+{% block styling %}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<style type="text/css">
+    .overlay {
+    height: 7%;
+    }
+    #articleBody p {
+    	text-align: justify;
+    }
+
+</style>
+<main>
+    <section class="overview-wrap" id="overview">
+        <div class="container">
+            <div class="contenedor">
+                <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Publications</h4>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="span9">
+                            <!-- Start Content -->
+                            <div id="rstpl-com_content" class="rstpl-content">
+                                <main id="main">
+                                    <div class="item-page rstpl-article-container" itemscope="" itemtype="http://schema.org/Article">
+                                        <br>
+                                        <div class="pull-left item-image">
+                                            <img style="width: 100%;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="" itemprop="image">
+                                        </div>
+                                        <div itemprop="articleBody" id="articleBody">
+                                            <p>&nbsp;</p>
+                                            <p>{{article.description|linebreaksbr}}</p>
+                                            <!-- It was one of those cold winter days of UK. I tried to hide myself in those cosy scarves and gloves sealing off my overcoat. I could hear my trendy high-heeled boots as I hurried up to my house. I was glad it helped me to keep my feet off the ground. Or else I thought I might have had a frostbite! The intense cold had already made me feel so pale.</p>
+                                                <p>No sooner I entered the house, I called at the helper, “Can I have a bowl of hot soup please?” The helper immediately returned my question, “With chicken or lamb?” I gasped, “Anything would do, but chicken soup could be prepared a bit quicker, so will have it!” My own words reverberated into my thoughts, “Looks like that was a good choice for the moment. I have heard soups are good for the cold, particularly chicken as it produces heat in the body, whereas lamb makes the body cool.</p>
+                                                <p>I silently smiled, “People think doctors are not supposed to believe in folk practices… but why not if it works?” My focus got more streamlined into the origin of Medicine itself. It is from the roots of such indigenous concepts, the modern medicine had its shoots.</p>
+                                                <p>Our body has several components, which need to be maintained such as blood, electrolytes, temperature, blood pressure, etc. The composition and the internal make up of these elements vary in their range and proportion. There is a fine equilibrium that is maintained between the components by the body itself. When this balance gets disturbed by internal or external causes, the body tries to adjust itself by ‘self-regulating’ the whole process, thus trying to bring back the stability. Or else it sends signals to the brain, which in turn commands us to act upon the requirement. This entire process is called as ‘<em>homeostasis</em>‘.</p>
+                                                <p>It is by the command of the brain that we feel thirsty on a hot day.&nbsp;We drink water so that the body gets sufficient water to feel refreshed again. When we get very tired, we fall asleep so that the constantly working brain cells can recuperate. On an intensely cold day like this, we wrap ourselves in coats and jumpers, so that we can keep ourselves warm from the outside. But then, where is my hot soup to keep myself more comfortable and feel the warmth internally? Just then it arrived perfectly to the synchrony of my thoughts.</p>
+                                                <p>As I took my sips, I further pondered how having a hot soup makes feel warm from the inside. I could relax a bit and wither off my gloves for the moment. I could sense how a simple strategy gets to restore the functioning and acts as a remedy. It is not only the concept of the modern science, but also the concept of four humours.</p>
+                                                <p>In fact the concept of four humours was the beginning on which medical developments were furthered. According to it, the body has four components, which are blood, phlegm, yellow bile and black bile. These components are proportioned within the body, which when tipped off will be self-regulated by the body itself. The stability can also be restored by having complementing substances such as soup. Even now, we could find similar terminologies being used across various traditions and cultures.</p>
+                                                <p>When we use what is available naturally as a remedy, it is called as a ‘<em>traditional therapy</em>‘ or a ‘<em>natural cure</em>‘. Interestingly, it is from these naturally available substances and products, science has progressed to marvel in its journey in establishing the perpetual treasures of the creation of human form and its constituents.</p>
+                                                <p>My thoughts traverse to the creation of human form, which in itself serves as a firm witness to the Magnificence of the Creator. <b>We look outside to the miracles of God. It is humbling to realise there are Allah’s Signs within us.</b></p>
+                                                <p><b><em>“On the earth are Signs for those of assured Faith. As also in your own selves: will you not then see?”</em></b></p>
+                                                <p><b><em>-The Glorious Qur’an 51: 20-21</em></b></p> -->
+                                            <p>&nbsp;</p>
+                                        </div>
+                                        {% if article.related_articles %}
+                                        <h5 class="rstpl-title">RELATED ARTICLES</h5>
+                                        <ul>
+                                            {% for r in article.related_articles.all %}
+                                            <li>
+                                                <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                </main>
+                            </div>
+                            <!-- End Content -->
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="rstpl-title">Recent Posts</h5>
+                                {% if recent_posts %}
+                                {% for r in recent_posts %}
+                                <div class="row">
+                                  <div class="col-3">
+                                    <img style="width: 50px; height: 50px; float: left; margin-right: 15px; margin-bottom: 15px;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="">
+                                  </div>
+                                  <div class="col-9">
+                                      <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>
+                                  </div>
+                                </div>
+
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="rstpl-title">Categories</h5>
+                                {% if all_category %}
+                                {% for c in all_category %}
+                                <br><a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:articles' c.slug %}">{{c.name|title}}</a>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    new WOW().init();
+</script>
+<script>
+    $(window).on("scroll", function() {
+    	if ($(this).scrollTop() > 10) {
+    		$("nav.navbar").addClass("mybg-dark");
+    		$("nav.navbar").addClass("navbar-shrink");
+    	} else {
+    		$("nav.navbar").removeClass("mybg-dark");
+    		$("nav.navbar").removeClass("navbar-shrink");
+    	}
+    });
+</script>
+{% endblock %}

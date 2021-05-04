@@ -39,17 +39,17 @@
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="#">Doctors & Therapists</a>
                                     <a class="dropdown-item" href="#">Appointments booking & Prices</a>
-                                    <a class="dropdown-item" href="#">Services Offered</a>
-                                    <a class="dropdown-item" href="#">FAQ</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='healthcare' page='services_offered' %}">Services Offered</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='healthcare' page='faq' %}">FAQ</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Academia</a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#">Training & Programmes</a>
-                                    <a class="dropdown-item" href="#">Publications</a>
-                                    <a class="dropdown-item" href="#">Information Leaflets</a>
-                                    <a class="dropdown-item" href="#">Integrative Medical (Wellbeing) Practice </a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='academia' page='training_programmes' %}">Training & Programmes</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='academia' page='publications' %}">Publications</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='academia' page='information_leaflets' %}">Information Leaflets</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='academia' page='integrative_medical_practice' %}">Integrative Medical (Wellbeing) Practice </a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">
@@ -65,13 +65,13 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">About</a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#">Mission & Vision, Values & Purpose</a>
-                                    <a class="dropdown-item" href="#">The Origin</a>
-                                    <a class="dropdown-item" href="#">The Founder</a>
-                                    <a class="dropdown-item" href="#">Timeline</a>
-                                    <a class="dropdown-item" href="#">IP notice</a>
-                                    <a class="dropdown-item" href="#">Disclaimer</a>
-                                    <a class="dropdown-item" href="#">Contact</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='mission_vision_values_purpose' %}">Mission & Vision, Values & Purpose</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='the_origin' %}">The Origin</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='the_founder' %}">The Founder</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='timeline' %}">Timeline</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='ip_notice' %}">IP notice</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='disclaimer' %}">Disclaimer</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='about' page='contact' %}">Contact</a>
                                 </div>
                             </li>
                         </ul>
