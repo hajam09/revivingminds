@@ -125,6 +125,7 @@
 					"id": '{{d.id}}',
 					"full_name": '{{d.user.first_name}} {{d.user.last_name}}',
 					"profile_img": '{{d.profile_picture_url}}',
+					"slug": '{{d.slug}}',
 					"tag": 'Doctor - Founder',
 				});
 
@@ -142,6 +143,7 @@
 					"id": '{{t.id}}',
 					"full_name": '{{t.user.first_name}} {{t.user.last_name}}',
 					"profile_img": '{{t.profile_picture_url}}',
+					"slug": '{{t.slug}}',
 					"tag": 'Therapist',
 				});
 
@@ -164,6 +166,7 @@
 
         for (i = 0; i < teams.length; i++)
         {
+        	
         	var newComonent = `
         	<li class="col-12 col-md-6 col-lg-3 wow fadeInLeft" data-wow-duration="1.4s">
 				<div class="mycard-block equal-hight">
@@ -171,9 +174,7 @@
 					<h3><a href="javascript:void(0)">`+teams[i].full_name+`</a></h3>
 					<p>`+teams[i].tag+`</p>
 					<ul class="follow-us clearfix">
-						<li><a href="#" class="btn btn-circle my-social-btn fb"><i class="fa fa-facebook " ></i></a></li>
-						<li><a href="#" class="btn btn-circle my-social-btn twitter"><i class="fa fa-twitter " ></i></a></li>
-						<li><a href="#" class="btn btn-circle my-social-btn google"><i class="fa fa-linkedin " ></i></a></li>
+						<li><a style="border-radius: 0px;" class="btn btn-primary" href="/booking/view_schedule/`+teams[i].slug+`" role="button">Book</a></li>
 					</ul>
 				</div>
 			</li>`;
