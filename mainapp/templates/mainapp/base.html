@@ -38,7 +38,7 @@
                                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Healthcare</a>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="#">Doctors & Therapists</a>
-                                    <a class="dropdown-item" href="#">Appointments booking & Prices</a>
+                                    <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='healthcare' page='appointment_booking_and_prices' %}">Appointments booking & Prices</a>
                                     <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='healthcare' page='services_offered' %}">Services Offered</a>
                                     <a class="dropdown-item" href="{% url 'mainapp:nav_bar_pages' folder='healthcare' page='faq' %}">FAQ</a>
                                 </div>

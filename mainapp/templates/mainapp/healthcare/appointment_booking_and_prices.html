@@ -1,0 +1,204 @@
+{% extends "mainapp/base.html" %}
+{% load static %}
+{% block styling %}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/pricing_details.css' %}" />
+<style type="text/css">
+	.overlay {
+	height: 7%;
+	}
+	#articleBody p {
+	text-align: justify;
+	}
+</style>
+<main>
+	<section class="overview-wrap" id="overview">
+		<div class="container">
+			<div class="contenedor">
+				<h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Appointments booking & Prices</h4>
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="container bootstrap snippets bootdey">
+							<div class="row justify-content-center">
+								<div class="col-sm-6 col-md-4 col-lg-4">
+									<div class="tile pt-inner border">
+										<div class="pti-header bg-green">
+											<h2>Doctor</h2>
+											<!-- or allow the user to enter custom value here. Check with DEV. -->
+											<!-- It's better to add the values below manually for many good reasons. -->
+											<!-- <div class="ptih-title">Papaya Pack</div> -->
+										</div>
+										<div class="pti-body">
+											{% if session_with_doctor %}
+											{% for s in session_with_doctor %}
+											{% ifequal s.session_name "CONSULTATION" %}
+											<div class="ptib-item">
+												Consultation starting at: £{{s.get_display_price}}
+											</div>
+											<div class="ptib-item">
+												Consultation duration: {{s.mins_to_hrs}}*
+											</div>
+											{% else %}
+											<div class="ptib-item">
+												{{s.session_name}} starting at: £{{s.get_display_price}}
+											</div>
+											<div class="ptib-item">
+												{{s.session_name}} duration: {{s.mins_to_hrs}}*
+											</div>
+											{% endifequal %}
+											{% endfor %}
+											{% endif %}
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-6 col-md-4 col-lg-4">
+									<div class="tile pt-inner border">
+										<div class="pti-header bg-cyan">
+											<h2>Therapist</h2>
+											<!-- <div class="ptih-title">Orange Pack</div> -->
+										</div>
+										<div class="pti-body">
+											{% if session_with_therapist %}
+											{% for s in session_with_therapist %}
+											{% ifequal s.session_name "CONSULTATION" %}
+											<div class="ptib-item">
+												Consultation starting at: £{{s.get_display_price}}
+											</div>
+											<div class="ptib-item">
+												Consultation duration: {{s.mins_to_hrs}}*
+											</div>
+											{% else %}
+											<div class="ptib-item">
+												{{s.session_name}} starting at: £{{s.get_display_price}}
+											</div>
+											<div class="ptib-item">
+												{{s.session_name}} duration: {{s.mins_to_hrs}}*
+											</div>
+											{% endifequal %}
+											{% endfor %}
+											{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-12">
+						<!-- List each doctor and therapist here and allow user to book the appointment -->
+						<section class="our-team" id="team">
+							<div class="container">
+								<h2 class="title-our-team wow fadeInUp">OUT TEAM</h2>
+								<div id="div_id_teams_display_container">
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</main>
+<script>
+	new WOW().init();
+</script>
+<script>
+	$(window).on("scroll", function() {
+		if ($(this).scrollTop() > 10) {
+			$("nav.navbar").addClass("mybg-dark");
+			$("nav.navbar").addClass("navbar-shrink");
+		} else {
+			$("nav.navbar").removeClass("mybg-dark");
+			$("nav.navbar").removeClass("navbar-shrink");
+		}
+	});
+
+	function combine_teams()
+	{
+		var teams =  [];
+		{% if doctors %}
+
+			{% for d in doctors %}
+
+				teams.push({
+					"id": '{{d.id}}',
+					"full_name": '{{d.user.first_name}} {{d.user.last_name}}',
+					"profile_img": '{{d.profile_picture_url}}',
+					"tag": 'Doctor - Founder',
+				});
+
+			{% endfor %}
+
+		{% endif %}
+
+
+
+		{% if therapists %}
+
+			{% for t in therapists %}
+
+				teams.push({
+					"id": '{{t.id}}',
+					"full_name": '{{t.user.first_name}} {{t.user.last_name}}',
+					"profile_img": '{{t.profile_picture_url}}',
+					"tag": 'Therapist',
+				});
+
+			{% endfor %}
+
+		{% endif %}
+
+		displayOurTeam(teams);
+	}
+
+	function displayOurTeam(teams)
+	{
+		if (teams.length ==0)
+			return;
+
+		var rowIndex = 1;
+        var colIndex = 0;
+
+        var articleComponent = '';
+
+        for (i = 0; i < teams.length; i++)
+        {
+        	var newComonent = `
+        	<li class="col-12 col-md-6 col-lg-3 wow fadeInLeft" data-wow-duration="1.4s">
+				<div class="mycard-block equal-hight">
+					<figure><img height="650" width="940" src="`+teams[i].profile_img+`" class="img-fluid" alt=""></figure>
+					<h3><a href="javascript:void(0)">`+teams[i].full_name+`</a></h3>
+					<p>`+teams[i].tag+`</p>
+					<ul class="follow-us clearfix">
+						<li><a href="#" class="btn btn-circle my-social-btn fb"><i class="fa fa-facebook " ></i></a></li>
+						<li><a href="#" class="btn btn-circle my-social-btn twitter"><i class="fa fa-twitter " ></i></a></li>
+						<li><a href="#" class="btn btn-circle my-social-btn google"><i class="fa fa-linkedin " ></i></a></li>
+					</ul>
+				</div>
+			</li>`;
+
+			articleComponent = articleComponent + newComonent;
+			colIndex = colIndex + 1;
+
+			if (colIndex == 4)
+			{
+                $('#div_id_teams_display_container').append('<ul class="row" id="team_i_container_'+rowIndex+'"></ul>');
+                $('#team_i_container_'+rowIndex).append(articleComponent);
+                articleComponent = '';
+                rowIndex = rowIndex + 1;
+                // do I need to reset colIndex = 0; so far no issue in the template as the next component is stacked below.
+            }
+
+        }
+
+        if (articleComponent != '') {
+                $('#div_id_teams_display_container').append('<ul class="row" id="team_i_container_'+rowIndex+'"></ul>');
+                $('#team_i_container_'+rowIndex).append(articleComponent);
+            }
+
+	}
+
+	combine_teams();
+</script>
+{% endblock %}

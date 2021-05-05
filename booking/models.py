@@ -22,6 +22,11 @@ class Session(models.Model):
 	def get_display_price(self):
 		return "{0:.2f}".format(self.cost / 100)
 
+	def mins_to_hrs(self):
+		hours = self.max_mins // 60
+		minutes = self.max_mins % 60
+		return "{}:{} {}".format(hours, minutes, "Hrs")
+
 
 """
 reason I made quantity with sesion is coz with bulk session booking there is discount price.
