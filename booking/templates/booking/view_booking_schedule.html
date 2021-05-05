@@ -15,77 +15,106 @@
    }
 </style>
 <main>
-   <section class="overview-wrap" id="overview">
-	  <div class="container">
-		 <div class="contenedor">
-			<h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Book Appointment</h4>
-			<button type="button" id="modalTriggerButton" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"></button>
-			<div class="row">
-			   <div class="col-lg-12">
-				  <div class="card-body p-0">
-					 <div id="calendar"></div>
-				  </div>
-				  <div class="container bootstrap snippets bootdey">
-					 <div class="row justify-content-center">
-						<!-- calendar modal -->
-						<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-						   <div class="modal-dialog modal-dialog-centered">
-							  <div class="modal-content">
-								 <form id="add-event">
-									<div class="modal-body">
-									   <h4>Add Event Detail</h4>
-									   <div class="form-group">
-										  <label>Event name</label>
-										  <input type="text" class="form-control" name="ename">
-									   </div>
-									   <div class="form-group">
-										  <label>Event Date</label>
-										  <input type='text' class="datetimepicker form-control" name="edate">
-									   </div>
-									   <div class="form-group">
-										  <label>Event Description</label>
-										  <textarea class="form-control" name="edesc"></textarea>
-									   </div>
-									   <div class="form-group">
-										  <label>Event Color</label>
-										  <select class="form-control" name="ecolor">
-											 <option value="fc-bg-default">fc-bg-default</option>
-											 <option value="fc-bg-blue">fc-bg-blue</option>
-											 <option value="fc-bg-lightgreen">fc-bg-lightgreen</option>
-											 <option value="fc-bg-pinkred">fc-bg-pinkred</option>
-											 <option value="fc-bg-deepskyblue">fc-bg-deepskyblue</option>
-										  </select>
-									   </div>
-									   <div class="form-group">
-										  <label>Event Icon</label>
-										  <select class="form-control" name="eicon">
-											 <option value="circle">circle</option>
-											 <option value="cog">cog</option>
-											 <option value="group">group</option>
-											 <option value="suitcase">suitcase</option>
-											 <option value="calendar">calendar</option>
-										  </select>
-									   </div>
-									</div>
-									<div class="modal-footer">
-									   <button type="submit" class="btn btn-primary" >Save</button>
-									   <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>        
-									</div>
-								 </form>
-							  </div>
-						   </div>
-						</div>
-					 </div>
-				  </div>
-			   </div>
-			</div>
-		 </div>
-	  </div>
-   </section>
+    <section class="overview-wrap" id="overview">
+        <div class="container">
+            <div class="contenedor">
+                <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Book Appointment</h4>
+                <button type="button" id="modalTriggerButton" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" hidden></button>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card-body p-0">
+                            <div id="calendar"></div>
+                        </div>
+                        <div class="container bootstrap snippets bootdey">
+                            <div class="row justify-content-center">
+                                <!-- calendar modal -->
+                                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form id="add-event">
+                                                <div class="modal-body">
+                                                    <div class="p-3 mb-2 bg-dark text-white">New Booking</div>
+                                                    <br>
+                                                    {% if user.is_authenticated %}
+                                                    <div>
+                                                        <div class="form-group">
+                                                            <label>Event Date</label>
+                                                            <input type='text' class="datetimepicker form-control" name="edate">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Event Description</label>
+                                                            <textarea class="form-control" name="edesc"></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Event Color</label>
+                                                            <select class="form-control" name="ecolor">
+                                                                <option value="fc-bg-default">fc-bg-default</option>
+                                                                <option value="fc-bg-blue">fc-bg-blue</option>
+                                                                <option value="fc-bg-lightgreen">fc-bg-lightgreen</option>
+                                                                <option value="fc-bg-pinkred">fc-bg-pinkred</option>
+                                                                <option value="fc-bg-deepskyblue">fc-bg-deepskyblue</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Event Icon</label>
+                                                            <select class="form-control" name="eicon">
+                                                                <option value="circle">circle</option>
+                                                                <option value="cog">cog</option>
+                                                                <option value="group">group</option>
+                                                                <option value="suitcase">suitcase</option>
+                                                                <option value="calendar">calendar</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-success" style="border-radius: 0px; background-color: #00bd90;">Confirm Booking</button>
+                                                            <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius: 0px;">Cancel Booking</button>        
+                                                        </div>
+                                                    </div>
+                                                    {% else %}
+                                                    <div>
+                                                        <div class="form-group">
+                                                            <label>Event Name</label>
+                                                            <select class="form-control" name="event-name">
+                                                                <option value="Consultation">Consultation</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Event Date</label>
+                                                            <input type='datetime-local' id="appointmentDateAndTime" class="datetimepicker form-control" name="edate" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Duration</label>
+                                                            <select class="form-control" name="duration" id="appointmentDuration">
+                                                                <option value="30">30 minutes</option>
+                                                                <option value="60">60 minutes</option>
+                                                                <option value="90">90 minutes</option>
+                                                                <option value="120">120 minutes</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Event Description</label>
+                                                            <textarea class="form-control" name="edesc"></textarea>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-success" style="border-radius: 0px; background-color: #00bd90;">Already have an account?</button>
+                                                            <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius: 0px;">Confirm booking</button>        
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
-<!-- <script>
-   new WOW().init();
-   </script> -->
+
 <script>
    $(window).on("scroll", function() {
 	 if ($(this).scrollTop() > 10) {
@@ -101,6 +130,7 @@
    
    var calendar = new FullCalendar.Calendar(calendarEl, {
 	themeSystem: 'bootstrap4',
+	locale: 'en-gb',
 	initialView: 'timeGridWeek',
 	timeZone: 'UTC',
 	headerToolbar: {
@@ -168,12 +198,93 @@
 			// Only reveal the modal if user clicked the weekly or daily view.
 			return;
 		}
-   
-		   $('#modalTriggerButton').click();
-			
-		console.log("start selectionInfo");
+
+		// checking if the clicked date is in the weekends.
+		var scheduleDate = new Date();
+		var clickedDate = selectionInfo.startStr.split("T")[0].split("-");
+		var clickedHours = selectionInfo.startStr.replace("Z", "").split("T")[1].split(":");
+
+		scheduleDate.setFullYear(parseInt(clickedDate[0]));
+		// javascript's Date months start with 0, so 9 is a 10th month and it is October
+		scheduleDate.setMonth(parseInt(clickedDate[1])-1);
+		scheduleDate.setDate(parseInt(clickedDate[2]));
+
+		scheduleDate.setHours(parseInt(clickedHours[0]));
+		scheduleDate.setMinutes(parseInt(clickedHours[1]));
+		scheduleDate.setSeconds(parseInt(clickedHours[2]));
+
+		if(scheduleDate.getDay() == 6 || scheduleDate.getDay() == 0) return;
+
+		// if clicked date is in the past, prevent the user from booking an appointment.
+		// for more robust check, implement it in the back-end as well.
+		var now = new Date();
+		if (scheduleDate < now) return;
+
+		// business hours values.
+		var startHour = 8;
+		var startMinute = 0;
+		var startSecond = 0;
+		var endHour = 18;
+		var endMinute = 0;
+		var endSecond = 0;
+
+		// to prevent click if outside business hours.
+		var workStartHrs = new Date();
+		workStartHrs.setFullYear(parseInt(clickedDate[0]));
+		workStartHrs.setMonth(parseInt(clickedDate[1])-1);
+		workStartHrs.setDate(parseInt(clickedDate[2]));
+		workStartHrs.setHours(startHour);
+		workStartHrs.setMinutes(startMinute);
+		workStartHrs.setSeconds(startSecond);
+
+		var workEndHrs = new Date();
+		workEndHrs.setFullYear(parseInt(clickedDate[0]));
+		workEndHrs.setMonth(parseInt(clickedDate[1])-1);
+		workEndHrs.setDate(parseInt(clickedDate[2]));
+		workEndHrs.setHours(endHour);
+		workEndHrs.setMinutes(endMinute);
+		workEndHrs.setSeconds(endSecond);
+
+		if(scheduleDate<workStartHrs || scheduleDate>=workEndHrs) return;
+
+
+		// adding and clearing the duration slots to prevent users from going over the business end hours.
+		var appointmentDurationComponent = `
+		<option id="30_slot" value="30">30 minutes</option>
+        <option id="60_slot" value="60">60 minutes</option>
+        <option id="90_slot" value="90">90 minutes</option>
+        <option id="120_slot" value="120">120 minutes</option>
+		`;
+
+		$('#appointmentDuration').empty();
+		$('#appointmentDuration').append(appointmentDurationComponent);
+
+		if (clickedHours[0] == "16" && clickedHours[1] == "30")
+		{
+			// user selected 4:30pm slot, only upto 90 minutes left. remove 120minutes slots.
+			$('#120_slot').remove();
+		}
+
+		if (clickedHours[0] == "17" && clickedHours[1] == "00")
+		{
+			// user selected 5:00pm slot, only upto 60 minutes left. remove 120minutes and 90minutes slots.
+			$('#120_slot').remove();
+			$('#90_slot').remove();
+		}
+
+		if (clickedHours[0] == "17" && clickedHours[1] == "30")
+		{
+			// user selected 5:30pm slot, only upto 30 minutes left. remove 120minutes, 90minutes and 60 minutes slots.
+			$('#120_slot').remove();
+			$('#90_slot').remove();
+			$('#60_slot').remove();
+		}
+
+		$('#modalTriggerButton').click();
+
+		// set the date and time here
+		$("#appointmentDateAndTime").val(selectionInfo.startStr.replace("Z", ""));
 		console.log(selectionInfo);
-		console.log("end selectionInfo");
 	 }
    });
    

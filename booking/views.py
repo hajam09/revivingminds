@@ -4,9 +4,18 @@ from accounts.models import Doctor
 from django.http import Http404
 
 def view_schedule(request, profile):
+	profile_obj = None
 	try:
-		profile = Therapist.objects.get(slug=profile)
+		profile_obj = Therapist.objects.get(slug=profile)
 	except Therapist.DoesNotExist:
+		pass
+
+	try:
+		profile_obj = Doctor.objects.get(slug=profile)
+	except Doctor.DoesNotExist:
+		pass
+
+	if profile_obj == None:
 		raise Http404
 
 	context = {}
