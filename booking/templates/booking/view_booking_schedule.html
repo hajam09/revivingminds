@@ -6,144 +6,178 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'css/full_calender.css' %}" />
 <style type="text/css">
-    .overlay {
-    height: 7%;
-    }
-    #articleBody p {
-    text-align: justify;
-    }
+   .overlay {
+   height: 7%;
+   }
+   #articleBody p {
+   text-align: justify;
+   }
 </style>
 <main>
-    <section class="overview-wrap" id="overview">
-        <div class="container">
-            <div class="contenedor">
-                <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Book Appointment</h4>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card-body p-0">
-                            <div id="calendar"></div>
-                        </div>
-                        <div class="container bootstrap snippets bootdey">
-                            <div class="row justify-content-center">
-                                <!-- calendar modal -->
-                                <div id="modal-view-event" class="modal modal-top fade calendar-modal">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-body">
-                                                <h4 class="modal-title"><span class="event-icon"></span><span class="event-title"></span></h4>
-                                                <div class="event-body"></div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="modal-view-event-add" class="modal modal-top fade calendar-modal">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <form id="add-event">
-                                                <div class="modal-body">
-                                                    <h4>Add Event Detail</h4>
-                                                    <div class="form-group">
-                                                        <label>Event name</label>
-                                                        <input type="text" class="form-control" name="ename">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label>Event Date</label>
-                                                        <input type='text' class="datetimepicker form-control" name="edate">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label>Event Description</label>
-                                                        <textarea class="form-control" name="edesc"></textarea>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label>Event Color</label>
-                                                        <select class="form-control" name="ecolor">
-                                                            <option value="fc-bg-default">fc-bg-default</option>
-                                                            <option value="fc-bg-blue">fc-bg-blue</option>
-                                                            <option value="fc-bg-lightgreen">fc-bg-lightgreen</option>
-                                                            <option value="fc-bg-pinkred">fc-bg-pinkred</option>
-                                                            <option value="fc-bg-deepskyblue">fc-bg-deepskyblue</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label>Event Icon</label>
-                                                        <select class="form-control" name="eicon">
-                                                            <option value="circle">circle</option>
-                                                            <option value="cog">cog</option>
-                                                            <option value="group">group</option>
-                                                            <option value="suitcase">suitcase</option>
-                                                            <option value="calendar">calendar</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-primary" >Save</button>
-                                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>        
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+   <section class="overview-wrap" id="overview">
+	  <div class="container">
+		 <div class="contenedor">
+			<h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Book Appointment</h4>
+			<button type="button" id="modalTriggerButton" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"></button>
+			<div class="row">
+			   <div class="col-lg-12">
+				  <div class="card-body p-0">
+					 <div id="calendar"></div>
+				  </div>
+				  <div class="container bootstrap snippets bootdey">
+					 <div class="row justify-content-center">
+						<!-- calendar modal -->
+						<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						   <div class="modal-dialog modal-dialog-centered">
+							  <div class="modal-content">
+								 <form id="add-event">
+									<div class="modal-body">
+									   <h4>Add Event Detail</h4>
+									   <div class="form-group">
+										  <label>Event name</label>
+										  <input type="text" class="form-control" name="ename">
+									   </div>
+									   <div class="form-group">
+										  <label>Event Date</label>
+										  <input type='text' class="datetimepicker form-control" name="edate">
+									   </div>
+									   <div class="form-group">
+										  <label>Event Description</label>
+										  <textarea class="form-control" name="edesc"></textarea>
+									   </div>
+									   <div class="form-group">
+										  <label>Event Color</label>
+										  <select class="form-control" name="ecolor">
+											 <option value="fc-bg-default">fc-bg-default</option>
+											 <option value="fc-bg-blue">fc-bg-blue</option>
+											 <option value="fc-bg-lightgreen">fc-bg-lightgreen</option>
+											 <option value="fc-bg-pinkred">fc-bg-pinkred</option>
+											 <option value="fc-bg-deepskyblue">fc-bg-deepskyblue</option>
+										  </select>
+									   </div>
+									   <div class="form-group">
+										  <label>Event Icon</label>
+										  <select class="form-control" name="eicon">
+											 <option value="circle">circle</option>
+											 <option value="cog">cog</option>
+											 <option value="group">group</option>
+											 <option value="suitcase">suitcase</option>
+											 <option value="calendar">calendar</option>
+										  </select>
+									   </div>
+									</div>
+									<div class="modal-footer">
+									   <button type="submit" class="btn btn-primary" >Save</button>
+									   <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>        
+									</div>
+								 </form>
+							  </div>
+						   </div>
+						</div>
+					 </div>
+				  </div>
+			   </div>
+			</div>
+		 </div>
+	  </div>
+   </section>
 </main>
 <!-- <script>
-    new WOW().init();
-    </script> -->
+   new WOW().init();
+   </script> -->
 <script>
-    $(window).on("scroll", function() {
-      if ($(this).scrollTop() > 10) {
-    	$("nav.navbar").addClass("mybg-dark");
-    	$("nav.navbar").addClass("navbar-shrink");
-      } else {
-    	$("nav.navbar").removeClass("mybg-dark");
-    	$("nav.navbar").removeClass("navbar-shrink");
-      }
-    });
-    
-    var calendarEl = document.getElementById('calendar');
-    
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-    	themeSystem: 'bootstrap4',
-    	initialView: 'timeGridWeek',
-    	headerToolbar: {
-    		left: 'prev,next today',
-    		center: 'title',
-    		right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-    	 },
-    	 selectable: true,
-    	 slotDuration: '00:30:00',
-    	 businessHours: {
-    		daysOfWeek: [ 1, 2, 3, 4, 5 ],
-    		startTime: '08:00',
-    		endTime: '18:00'
-    	 },
-    	 buttonText :{
-    		today:    'TODAY',
-    		month:    'MONTH',
-    		week:     'WEEK',
-    		day:      'DAY',
-    		list:     'LIST'
-    		},
-    	 events: event,
-    	 navLinks: true,
-    	 navLinkWeekClick: function(weekStart, jsEvent) {
-    	 	console.log('week start', weekStart.toISOString());
-    	 	console.log('coords', jsEvent.pageX, jsEvent.pageY);
-    	 },
-    	 nowIndicator:true,
-    });
-
-    calendar.render();
-    
+   $(window).on("scroll", function() {
+	 if ($(this).scrollTop() > 10) {
+	$("nav.navbar").addClass("mybg-dark");
+	$("nav.navbar").addClass("navbar-shrink");
+	 } else {
+	$("nav.navbar").removeClass("mybg-dark");
+	$("nav.navbar").removeClass("navbar-shrink");
+	 }
+   });
+   
+   var calendarEl = document.getElementById('calendar');
+   
+   var calendar = new FullCalendar.Calendar(calendarEl, {
+	themeSystem: 'bootstrap4',
+	initialView: 'timeGridWeek',
+	timeZone: 'UTC',
+	headerToolbar: {
+		left: 'prev,next today',
+		center: 'title',
+		right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+	 },
+	 selectable: true,
+	 // unselectAuto: true,
+	 //selectOverlap: false,//Determines whether the user is allowed to select periods of time that are occupied by events.
+	 slotDuration: '00:30:00',
+	 businessHours: {
+		daysOfWeek: [ 1, 2, 3, 4, 5 ],
+		startTime: '08:00',
+		endTime: '18:00'
+	 },
+	 buttonText :{
+		today:    'TODAY',
+		month:    'MONTH',
+		week:     'WEEK',
+		day:      'DAY',
+		list:     'LIST'
+		},
+	 events: [{
+			   title: 'Meeting',
+			   start: '2021-05-06T10:30:00',
+			   end: '2021-05-06T12:30:00'
+			 },
+			 {
+			   title: 'Lunch',
+			   start: '2021-05-05T12:00:00'
+			 },
+			 {
+			   title: 'Meeting',
+			   start: '2021-05-05T14:30:00'
+			 },
+			 {
+			   title: 'Birthday Party',
+			   start: '2021-05-04T07:00:00'
+			 }],
+	 navLinks: true,
+	 navLinkWeekClick: function(weekStart, jsEvent) {
+		console.log('week start', weekStart.toISOString());
+		console.log('coords', jsEvent.pageX, jsEvent.pageY);
+	 },
+	 nowIndicator:true,
+	 // selectAllow: function(selectInfo) {
+	 //     console.log(selectInfo);
+	 //     console.log("selectInfo");
+	 //     // Exact programmatic control over where the user can select.
+	 //     // use to open a model and set the date for the clicked slot.
+	 // },
+	 dateClick: function( info ) {
+		// Exact programmatic control over where the user can select.
+		// use to open a model and set the date for the clicked slot.
+		// console.log('Clicked on: ' + info.dateStr);
+		// console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+		// console.log('Current view: ' + info.view.type);
+		// info.dayEl.style.backgroundColor = 'red';
+	 },
+	 select: function( selectionInfo ) {
+		if (selectionInfo.allDay)
+		{
+			// User clicked the slot in the MONTH view.
+			// Only reveal the modal if user clicked the weekly or daily view.
+			return;
+		}
+   
+		   $('#modalTriggerButton').click();
+			
+		console.log("start selectionInfo");
+		console.log(selectionInfo);
+		console.log("end selectionInfo");
+	 }
+   });
+   
+   calendar.render();
+   
 </script>
 {% endblock %}
