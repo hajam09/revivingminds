@@ -6,7 +6,10 @@ from booking.models import Session
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.views.generic import TemplateView
+from django.urls import reverse
+from django.shortcuts import redirect
 from django.core.cache import cache
+from django.http import HttpResponseRedirect
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -19,9 +22,19 @@ class CancelView(TemplateView):
 class ProductLandingPageView(TemplateView):
 	template_name = "payment/landing.html"
 
+	def get(self, *args, **kwargs):
+		appointments = cache.get(self.request.session.session_key)
+		print("appointments",appointments)
+		if appointments == None:
+			return redirect('mainapp:nav_bar_pages', folder='healthcare', page='appointment_booking_and_prices')
+		return super().get(*args, **kwargs)
+
+
 	def get_context_data(self, **kwargs):
 		context = super(ProductLandingPageView, self).get_context_data(**kwargs)
 		appointments = cache.get(self.request.session.session_key)
+		print(self.request.session.session_key)
+
 		context.update({
 			"appointments": appointments,
 			"STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
@@ -30,7 +43,7 @@ class ProductLandingPageView(TemplateView):
 
 class CreateCheckoutSessionView(View):
 	def post(self, request, *args, **kwargs):
-		
+
 		therapy_session_id = self.kwargs["pk"]
 		session_type = Session.objects.get(id=therapy_session_id)
 		print(session_type)
