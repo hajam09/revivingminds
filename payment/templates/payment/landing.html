@@ -11,9 +11,28 @@
       <div class="product">
         
         <div class="description">
-          <h3>{{therapy_session.session_name}}</h3>
-          <h5>£{{therapy_session.cost}}</h5>
-          <h5>{{therapy_session.quantity}}</h5>
+          {% if appointments %}
+
+            {% for a in appointments %}
+
+            <p>{{a.doctor.user.first_name}}</p>
+            <p>{{a.therapist.user.first_name}}</p>
+
+            <p>{{a.start_time}}</p>
+            <p>{{a.end_time}}</p>
+
+
+            {% endfor %}
+
+            {{ appointments.0.session_type.session_name }}
+            {{ appointments.0.session_type.session_name }}
+            {{ appointments.0.session_type.cost }}
+            {{ appointments.0.session_type.id }}
+
+
+
+          {% endif %}
+
         </div>
       </div>
       <button type="button" id="checkout-button">Checkout</button>
@@ -27,7 +46,7 @@
     var checkoutButton = document.getElementById("checkout-button");
 
     checkoutButton.addEventListener("click", function () {
-      fetch("{% url 'payment:create-checkout-session' therapy_session.pk %}", {
+      fetch("{% url 'payment:create-checkout-session' appointments.0.session_type.id %}", {
         method: "POST",
         headers: {
         	'X-CSRFToken': csrftoken

@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<meta name="viewport" content="width=1024">
 <style type="text/css">
    .overlay {
    height: 7%;
@@ -13,6 +14,20 @@
    #articleBody p {
    text-align: justify;
    }
+/*   footer{
+    	clear: both;
+    border: 1px groove #aaaaaa;
+    background: blue;
+    color: White;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    line-height: normal;
+    margin: 0;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    }*/
 </style>
 <main>
     <section class="overview-wrap" id="overview">
@@ -31,7 +46,8 @@
                                 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
-                                            <form id="add-event">
+                                            <form id="add-event" method="POST">
+                                            	{% csrf_token %}
                                                 <div class="modal-body">
                                                     <div class="p-3 mb-2 bg-dark text-white">New Booking</div>
                                                     <br>
@@ -71,7 +87,13 @@
                                                         </div>
                                                     </div>
                                                     {% else %}
+                                                    <input name="create-appointment-for-unauthenticated-user" hidden>
+                                                    <input name="single-event" hidden>
                                                     <div>
+                                                    	<div class="form-group">
+                                                            <label>Email</label>
+                                                            <input type="email" name="email" class="form-control" required>
+                                                        </div>
                                                         <div class="form-group">
                                                             <label>Event Name</label>
                                                             <select class="form-control" name="event-name">
@@ -80,7 +102,7 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Event Date</label>
-                                                            <input type='datetime-local' id="appointmentDateAndTime" class="datetimepicker form-control" name="edate" disabled>
+                                                            <input type='datetime-local' id="appointmentDateAndTime" class="datetimepicker form-control" name="edate">
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Duration</label>
@@ -97,7 +119,7 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="submit" class="btn btn-success" style="border-radius: 0px; background-color: #00bd90;">Already have an account?</button>
-                                                            <button type="button" class="btn btn-light" data-dismiss="modal" style="border-radius: 0px;">Confirm booking</button>        
+                                                            <button type="submit" class="btn btn-light" style="border-radius: 0px;">Review</button>        
                                                         </div>
                                                     </div>
                                                     {% endif %}
@@ -133,6 +155,7 @@
 	locale: 'en-gb',
 	initialView: 'timeGridWeek',
 	timeZone: 'UTC',
+	height: 'auto',
 	headerToolbar: {
 		left: 'prev,next today',
 		center: 'title',
