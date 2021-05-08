@@ -12,6 +12,12 @@
     	text-align: justify;
     }
 
+    .card img {
+        height: auto;
+        width: auto;
+        object-fit: contain;
+    }
+
 </style>
 <main>
     <section class="overview-wrap" id="overview">
@@ -27,7 +33,7 @@
                                     <div class="item-page rstpl-article-container" itemscope="" itemtype="http://schema.org/Article">
                                         <br>
                                         <div class="pull-left item-image">
-                                            <img style="width: 100%;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="" itemprop="image">
+                                            <img style="width: 100%;" src="{% if article.image %}{{ article.article_image_url.url }}{% else %}https://html.com/wp-content/uploads/html-hpg-featured-new.png{% endif %}" alt="" itemprop="image">
                                         </div>
                                         <div itemprop="articleBody" id="articleBody">
                                             <p>&nbsp;</p>
@@ -69,7 +75,7 @@
                                 {% for r in recent_posts %}
                                 <div class="row">
                                   <div class="col-3">
-                                    <img style="width: 50px; height: 50px; float: left; margin-right: 15px; margin-bottom: 15px;" src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" alt="">
+                                    <img style="width: 80px; height: 50px; float: left; margin-right: 15px; margin-bottom: 15px;" src="{% if r.image %}{{ r.article_image_url.url }}{% else %}https://html.com/wp-content/uploads/html-hpg-featured-new.png{% endif %}" alt="">
                                   </div>
                                   <div class="col-9">
                                       <a style="text-transform: capitalize; color: #63a0eb;" href="{% url 'mainapp:article_page' category=r.category.slug article=r.slug %}">{{r.title|title}}</a>

@@ -21,3 +21,9 @@ class Article(models.Model):
 
 	def __str__ (self):
 		return self.title
+
+	@property
+	def article_image_url(self):
+		if self.image or self.image != None:
+			return self.image
+		return "https://html.com/wp-content/uploads/html-hpg-featured-new.png"

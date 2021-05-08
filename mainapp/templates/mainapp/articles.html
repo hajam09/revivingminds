@@ -11,7 +11,16 @@
     #articleBody p {
     	text-align: justify;
     }
-
+    @media (min-width: 1200px){
+        .container {
+            max-width: 1190px;
+        }
+    }
+    .card img {
+        height: auto;
+        width: auto;
+        object-fit: contain;
+    }
 </style>
 <main>
     <section class="overview-wrap" id="overview">
@@ -71,11 +80,26 @@
 
                 {% endif %}
 
+                // 
+
+                {% if article.image %}
+
+                    var img_url = '{{ article.article_image_url.url }}';
+
+                {% else %}
+
+                    var img_url = 'https://html.com/wp-content/uploads/html-hpg-featured-new.png';
+
+                {% endif %}
+
                 var newComonent = `
-                <div class="col-md-4 wow bounceInUp" data-wow-duration="1.4s">
+                <div class="col-md-6 col-sm-12 col-lg-4 wow bounceInUp" data-wow-duration="1.4s">
                     <div class="card">
                         <figure class="text-center">
-                            <img src="https://html.com/wp-content/uploads/html-hpg-featured-new.png" class="img-fluid" height=650 width=940>
+                            <a href="/info/{{article.category.slug}}/{{article.slug}}">
+                                <img src="`+img_url+`" class="img-fluid" height=650 width=940>
+                            </a>
+                            
                         </figure>
                         <div class="card-body">
                             
@@ -109,9 +133,5 @@
     }
 
     displayArticles();
-
-        
-
-
 </script>
 {% endblock %}

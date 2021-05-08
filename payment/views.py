@@ -24,17 +24,13 @@ class ProductLandingPageView(TemplateView):
 
 	def get(self, *args, **kwargs):
 		appointments = cache.get(self.request.session.session_key)
-		print("appointments",appointments)
 		if appointments == None:
 			return redirect('mainapp:nav_bar_pages', folder='healthcare', page='appointment_booking_and_prices')
 		return super().get(*args, **kwargs)
 
-
 	def get_context_data(self, **kwargs):
 		context = super(ProductLandingPageView, self).get_context_data(**kwargs)
 		appointments = cache.get(self.request.session.session_key)
-		print(self.request.session.session_key)
-
 		context.update({
 			"appointments": appointments,
 			"STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from accounts.models import Therapist
 from accounts.models import Doctor
+from accounts.models import Patient
 from django.contrib.auth.models import User
 from django.http import Http404
 from booking.models import Session
@@ -9,6 +10,8 @@ from datetime import datetime
 from datetime import timedelta
 from django.shortcuts import redirect
 from django.core.cache import cache
+import random, string
+from django.contrib.auth.models import User
 
 def view_schedule(request, profile):
 	if not request.session.session_key:
@@ -47,6 +50,21 @@ def view_schedule(request, profile):
 					duration = request.POST['duration']
 
 					if not Appointment.objects.filter(doctor=profile_obj, start_time=start_time).exists():
+						# temp user object, patient object and Appointment object.
+						temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+						new_user = User(
+								username=email,
+								email=email,
+								password=temp_pass,
+							)
+						new_user.save()
+
+						new_patient = Patient(
+								user=new_user,
+								date_of_birth=datetime.today().strftime('%Y-%m-%d')
+							)
+						new_patient.save()
+
 						new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
 						new_end_time = new_start_time + timedelta(minutes = int(duration))
 						new_appointment = Appointment(
@@ -56,7 +74,9 @@ def view_schedule(request, profile):
 								session_type=new_session,
 								zoom_link=''
 							)
-						cache.set(request.session.session_key, [new_appointment], 300)
+						new_appointment.save()
+						new_appointment.patients.add(new_patient)
+						cache.set(request.session.session_key, [new_appointment], 500)
 						# set this object in the cache for 5 minutes.
 						return redirect('payment:landing-page')
 
@@ -79,7 +99,7 @@ def view_schedule(request, profile):
 								session_type=new_session,
 								zoom_link=''
 							)
-						cache.set(request.session.session_key, [new_appointment], 300)
+						cache.set(request.session.session_key, [new_appointment], 500)
 						# set this object in the cache for 5 minutes.
 						return redirect('payment:landing-page')
 
