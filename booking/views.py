@@ -1,22 +1,22 @@
-from django.shortcuts import render
-from accounts.models import Therapist
 from accounts.models import Doctor
 from accounts.models import Patient
-from django.contrib.auth.models import User
-from django.http import Http404
-from booking.models import Session
+from accounts.models import Therapist
 from booking.models import Appointment
+from booking.models import Session
 from datetime import datetime
 from datetime import timedelta
-from django.shortcuts import redirect
-from django.core.cache import cache
-import random, string
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.http import Http404
+from django.shortcuts import redirect
+from django.shortcuts import render
+import random
+import string
 
 def view_schedule(request, profile):
 	if not request.session.session_key:
 		request.session.save()
-	print(request.session.session_key)
+
 	profile_obj = None
 	try:
 		profile_obj = Therapist.objects.get(slug=profile)
@@ -39,68 +39,59 @@ def view_schedule(request, profile):
 			pass
 
 		# for this doctor or therapist get the consultation session for pricing
-		# redirect user to the payment page
 		if(isinstance(profile_obj, Doctor)):
 			if 'single-event' in request.POST:
 				# booking a single appointment.
-				if(Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=1).exists()):
+				get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=1)
+				if get_session.exists():
 
-					new_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name)[0]
+					new_session = get_session[0]
 					start_time = request.POST['edate']
 					duration = request.POST['duration']
 
+					cacheData = {
+						"consultant": 'doctor',
+						"consultant_id": profile_obj.pk,
+						"patient_email": email,
+						"event_type": 'single-event',
+						"session_id":new_session.pk,
+						"start_time": start_time,
+						"duration": duration,
+					}
+
 					if not Appointment.objects.filter(doctor=profile_obj, start_time=start_time).exists():
-						# temp user object, patient object and Appointment object.
-						temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-						new_user = User(
-								username=email,
-								email=email,
-								password=temp_pass,
-							)
-						new_user.save()
-
-						new_patient = Patient(
-								user=new_user,
-								date_of_birth=datetime.today().strftime('%Y-%m-%d')
-							)
-						new_patient.save()
-
-						new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-						new_end_time = new_start_time + timedelta(minutes = int(duration))
-						new_appointment = Appointment(
-								doctor=profile_obj,
-								start_time=new_start_time,
-								end_time=new_end_time,
-								session_type=new_session,
-								zoom_link=''
-							)
-						new_appointment.save()
-						new_appointment.patients.add(new_patient)
-						cache.set(request.session.session_key, [new_appointment], 500)
+						cache.set(request.session.session_key, cacheData, 600)
 						# set this object in the cache for 5 minutes.
 						return redirect('payment:landing-page')
+			else:
+				# bulk booking with doctor.
+				pass
 
 		elif(isinstance(profile_obj, Therapist)):
 			if 'single-event' in request.POST:
 				# booking a single appointment.
-				if(Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=1).exists()):
+				get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=1)
+				if get_session.exists():
 
-					new_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name)[0]
+					new_session = get_session[0]
 					start_time = request.POST['edate']
 					duration = request.POST['duration']
 
+					cacheData = {
+						"consultant": 'therapist',
+						"consultant_id": profile_obj.pk,
+						"patient_email": email,
+						"event_type": 'single-event',
+						"session_id":new_session.pk,
+						"start_time": start_time,
+						"duration": duration,
+					}
+
 					if not Appointment.objects.filter(therapist=profile_obj, start_time=start_time).exists():
-						new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-						new_end_time = new_start_time + timedelta(minutes = int(duration))
-						new_appointment = Appointment(
-								therapist=profile_obj,
-								start_time=new_start_time,
-								end_time=new_end_time,
-								session_type=new_session,
-								zoom_link=''
-							)
-						cache.set(request.session.session_key, [new_appointment], 500)
-						# set this object in the cache for 5 minutes.
+						cache.set(request.session.session_key, cacheData, 600)
 						return redirect('payment:landing-page')
+			else:
+				# bulk-booking with therapist
+				pass
 
 	return render(request, "booking/view_booking_schedule.html")
