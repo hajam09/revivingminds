@@ -55,7 +55,7 @@
                                                     <div>
                                                         <div class="form-group">
                                                             <label>Event Date</label>
-                                                            <input type='text' class="datetimepicker form-control" name="edate">
+                                                            <input type='text' class="datetimepicker form-control" name="edate" readonly>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Event Description</label>
@@ -102,7 +102,7 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Event Date</label>
-                                                            <input type='datetime-local' id="appointmentDateAndTime" class="datetimepicker form-control" name="edate">
+                                                            <input type='datetime-local' id="appointmentDateAndTime" class="datetimepicker form-control" name="edate" readonly>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Duration</label>
@@ -138,15 +138,41 @@
 </main>
 
 <script>
-   $(window).on("scroll", function() {
-	 if ($(this).scrollTop() > 10) {
-	$("nav.navbar").addClass("mybg-dark");
-	$("nav.navbar").addClass("navbar-shrink");
-	 } else {
-	$("nav.navbar").removeClass("mybg-dark");
-	$("nav.navbar").removeClass("navbar-shrink");
-	 }
-   });
+   $(window).on("scroll", function()
+   {
+   		if ($(this).scrollTop() > 10)
+   		{
+   			$("nav.navbar").addClass("mybg-dark");
+   			$("nav.navbar").addClass("navbar-shrink");
+   		}
+   		else
+   		{
+   			$("nav.navbar").removeClass("mybg-dark");
+   			$("nav.navbar").removeClass("navbar-shrink");
+   		}
+   	});
+
+   	function getScheduledAppointments()
+   	{
+
+   		var appointments = [];
+   		{% if existing_appointments %}
+
+   		{% for a in existing_appointments %}
+
+   			appointments.push(
+	   			{
+	   				title: '{{ a.session_type.session_name }}',
+	   				start: '{{ a.get_start_time_in_fomat }}',
+	   				end: '{{ a.get_end_time_in_fomat }}'
+	   			}
+   			);
+
+   		{% endfor %}
+
+   		{% endif %}
+   		return appointments
+   	}
    
    var calendarEl = document.getElementById('calendar');
    
@@ -177,23 +203,7 @@
 		day:      'DAY',
 		list:     'LIST'
 		},
-	 events: [{
-			   title: 'Meeting',
-			   start: '2021-05-06T10:30:00',
-			   end: '2021-05-06T12:30:00'
-			 },
-			 {
-			   title: 'Lunch',
-			   start: '2021-05-05T12:00:00'
-			 },
-			 {
-			   title: 'Meeting',
-			   start: '2021-05-05T14:30:00'
-			 },
-			 {
-			   title: 'Birthday Party',
-			   start: '2021-05-04T07:00:00'
-			 }],
+	 events: getScheduledAppointments(),
 	 navLinks: true,
 	 navLinkWeekClick: function(weekStart, jsEvent) {
 		console.log('week start', weekStart.toISOString());

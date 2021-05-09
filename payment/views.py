@@ -43,53 +43,133 @@ class ProductLandingPageView(TemplateView):
 		cacheData = cache.get(self.request.session.session_key)
 		appointments = []
 
-		if cacheData['consultant'] == "doctor":
-			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
-			
-			if cacheData['event_type'] == 'single-event':
-				start_time = cacheData['start_time']
-				duration = cacheData['duration']
+		duration = cacheData['duration']
 
-				# book a single appointment
+		# CREATE 'Appointment' OBJECTS FOR DISPLAY ONLY AND NOT TO BE SAVED. WHICH WILL BE DONE AFTER PAYMENT IS SUCCESS.
+
+		# authenticated user books a single appointment with the doctor.
+		if self.request.user.is_authenticated and cacheData['consultant'] == "doctor" and cacheData['event_type'] == 'single-event':
+			#cacheData = {"consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": start_time, "duration": duration, }
+			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+			start_time = cacheData['start_time']
+
+			if not Appointment.objects.filter(doctor=doctor, start_time=start_time).exists():
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
 				get_session = Session.objects.get(id=cacheData['session_id'])
-				if not Appointment.objects.filter(doctor=doctor, start_time=start_time).exists():
-					new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-					new_end_time = new_start_time + timedelta(minutes = int(duration))
-					new_appointment = Appointment(
+				appointments = [
+					Appointment(
 						doctor=doctor,
 						start_time=new_start_time,
 						end_time=new_end_time,
 						session_type=get_session,
 						zoom_link=''
 					)
-					appointments.append(new_appointment)
-			else:
-				# bulk-booking with doctor
-				pass
-		elif cacheData['consultant'] == "therapist":
+				]
+
+		# authenticated user books a single appointment with the therapist.	
+		elif self.request.user.is_authenticated and cacheData['consultant'] == "therapist" and cacheData['event_type'] == 'single-event':
+			# cacheData = { "consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": start_time, "duration": duration, }
 			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+			start_time = cacheData['start_time']
 
-			if cacheData['event_type'] == 'single-event':
-				start_time = cacheData['start_time']
-				duration = cacheData['duration']
-
-				# book a single appointment
+			if not Appointment.objects.filter(therapist=therapist, start_time=start_time).exists():
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
 				get_session = Session.objects.get(id=cacheData['session_id'])
-				if not Appointment.objects.filter(therapist=therapist, start_time=start_time).exists():
-					new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-					new_end_time = new_start_time + timedelta(minutes = int(duration))
-					new_appointment = Appointment(
+				appointments = [
+					Appointment(
 						therapist=therapist,
 						start_time=new_start_time,
 						end_time=new_end_time,
 						session_type=get_session,
 						zoom_link=''
 					)
-					appointments.append(new_appointment)
-			else:
-				# bulk-booking with therapist
-				pass
+				]
+				
+		# authenticated user books bulk appointment with the doctor.	
+		elif self.request.user.is_authenticated and cacheData['consultant'] == "doctor" and cacheData['event_type'] == 'multiple-event':
+			# cacheData = {"consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": [], "number_of_appointments": quantity, "duration": duration, }
+			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+			get_session = Session.objects.get(id=cacheData['session_id'])
 
+			def getAppointmentsForDoctor( start_time ):
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				return Appointment(
+					doctor=doctor,
+					start_time=new_start_time,
+					end_time=new_end_time,
+					session_type=get_session,
+					zoom_link=''
+				)
+
+			appointments = [
+				getAppointmentsForDoctor(t)
+				for t in cacheData['start_time']
+			]
+
+		# authenticated user books bulk appointment with the therapist.	
+		elif self.request.user.is_authenticated and cacheData['consultant'] == "therapist" and cacheData['event_type'] == 'multiple-event':
+			# cacheData = { "consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": [], "number_of_appointments": quantity, "duration": duration, }
+			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+			get_session = Session.objects.get(id=cacheData['session_id'])
+
+			def getAppointmentsForTherapist( start_time ):
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				return Appointment(
+					therapist=therapist,
+					start_time=new_start_time,
+					end_time=new_end_time,
+					session_type=get_session,
+					zoom_link=''
+				)
+
+			appointments = [
+				getAppointmentsForTherapist(t)
+				for t in cacheData['start_time']
+			]
+
+		# un-authenticated user books a single appointment with the doctor.	
+		elif not self.request.user.is_authenticated and cacheData['consultant'] == "doctor" and cacheData['event_type'] == 'single-event':
+			# cacheData = { "consultant_id": profile_obj.pk, "patient_email": email, "session_id": get_session[0].pk, "start_time": start_time, "duration": duration, }
+			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+			start_time = cacheData['start_time']
+
+			if not Appointment.objects.filter(doctor=doctor, start_time=start_time).exists():
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				get_session = Session.objects.get(id=cacheData['session_id'])
+				appointments = [
+					Appointment(
+						doctor=doctor,
+						start_time=new_start_time,
+						end_time=new_end_time,
+						session_type=get_session,
+						zoom_link=''
+					)
+				]
+
+		# un-authenticated user books a single appointment with the therapist.	
+		elif not self.request.user.is_authenticated and cacheData['consultant'] == "therapist" and cacheData['event_type'] == 'single-event':
+			# cacheData = { "consultant_id": profile_obj.pk, "patient_email": email, "session_id": get_session[0].pk, "start_time": start_time, "duration": duration, }
+			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+			start_time = cacheData['start_time']
+
+			if not Appointment.objects.filter(therapist=therapist, start_time=start_time).exists():
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				get_session = Session.objects.get(id=cacheData['session_id'])
+				appointments = [
+					Appointment(
+						therapist=therapist,
+						start_time=new_start_time,
+						end_time=new_end_time,
+						session_type=get_session,
+						zoom_link=''
+					)
+				]
 
 		print(cacheData)
 
@@ -161,6 +241,8 @@ def stripe_webhook(request):
 		session = event['data']['object']
 
 		# Fulfill the purchase...
+		# will not work as this is not a class based view.
+		# need to check if request contants session key and other django stuff.
 		cacheData = cache.get(self.request.session.session_key)
 		customer_email = session["customer_details"]["email"]
 		payment_status = session["payment_details"]
@@ -217,7 +299,7 @@ def stripe_webhook(request):
 					from_email=''
 				)
 			else:
-				# bulk-appointment
+				
 				pass
 			pass
 

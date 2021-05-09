@@ -174,4 +174,9 @@ def view_schedule(request, profile):
 				cache.set(request.session.session_key, cacheData, 600)
 				return redirect('payment:landing-page')
 
-	return render(request, "booking/view_booking_schedule.html")
+	existing_appointments = Appointment.objects.filter(doctor=profile_obj) if isinstance(profile_obj, Doctor) else Appointment.objects.filter(doctor=profile_obj)
+
+	context = {
+		"existing_appointments": existing_appointments
+	}
+	return render(request, "booking/view_booking_schedule.html", context)

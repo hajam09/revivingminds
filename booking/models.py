@@ -49,3 +49,10 @@ class Appointment(models.Model):
 	end_time = models.DateTimeField(auto_now=False, auto_now_add=False)
 	session_type = models.ForeignKey(Session, on_delete=models.CASCADE)
 	zoom_link = models.URLField(max_length=500)
+
+	def get_start_time_in_fomat(self):
+		# 2021-05-06T10:30:00
+		return "T".join(str(self.start_time).split(" "))
+
+	def get_end_time_in_fomat(self):
+		return "T".join(str(self.end_time).split(" "))
