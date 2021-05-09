@@ -31,67 +31,147 @@ def view_schedule(request, profile):
 	if profile_obj == None:
 		raise Http404
 
-	if request.method == "POST" and 'create-appointment-for-unauthenticated-user' in request.POST:
+	# process authenticated user
+	if request.method == "POST" and request.user.is_authenticated:
+		session_name = request.POST['event-name']
+
+		# for this doctor get the session to determine pricing for a single appointment.
+		if isinstance(profile_obj, Doctor) and 'single-event' in request.POST:
+			get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=1)
+			start_time = request.POST['edate']
+			duration = request.POST['duration']
+
+			# session found to get the price and the slot is available to book with the doctor.
+			if get_session.exists() and not Appointment.objects.filter(doctor=profile_obj, start_time=start_time).exists():
+				cacheData = {
+					"consultant": 'doctor',
+					"consultant_id": profile_obj.pk,
+					"patient_email": request.user.email,
+					"event_type": 'single-event',
+					"session_id": get_session[0].pk,
+					"start_time": start_time,
+					"duration": duration,
+				}
+
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
+
+		# for this therapist get the session to determine pricing for a single appointment.
+		if isinstance(profile_obj, Therapist) and 'single-event' in request.POST:
+			get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=1)
+			start_time = request.POST['edate']
+			duration = request.POST['duration']
+
+			# session found to get the price and the slot is available to book with the therapist.
+			if get_session.exists() and not Appointment.objects.filter(therapist=profile_obj, start_time=start_time).exists():
+				cacheData = {
+					"consultant": 'therapist',
+					"consultant_id": profile_obj.pk,
+					"patient_email": request.user.email,
+					"event_type": 'single-event',
+					"session_id": get_session[0].pk,
+					"start_time": start_time,
+					"duration": duration,
+				}
+
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
+
+		# for this doctor get the session to determine pricing for a bulk appointment.
+		if isinstance(profile_obj, Doctor) and 'multiple-event' in request.POST:
+			quantity = request.POST['number_of_appointments']
+			get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=quantity)
+
+			# session found to get the price for bulk-appointments.
+			# no need to check if appointment slot is free for each week. Raise alert/ticket to the appropriate consultant for each overlapping appointment.
+			if get_session.exists():
+				cacheData = {
+					"consultant": 'doctor',
+					"consultant_id": profile_obj.pk,
+					"patient_email": request.user.email,
+					"event_type": 'multiple-event',
+					"session_id": get_session[0].pk,
+					"start_time": [],
+					"number_of_appointments": quantity,
+					"duration": duration,
+				}
+
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
+
+		# for this therapist get the session to determine pricing for a bulk appointment.
+		if isinstance(profile_obj, Therapist) and 'multiple-event' in request.POST:
+			quantity = request.POST['number_of_appointments']
+			get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=quantity)
+
+			# session found to get the price for bulk-appointments.
+			# no need to check if appointment slot is free for each week. Raise alert/ticket to the appropriate consultant for each overlapping appointment.
+			if get_session.exists():
+				cacheData = {
+					"consultant": 'therapist',
+					"consultant_id": profile_obj.pk,
+					"patient_email": request.user.email,
+					"event_type": 'multiple-event',
+					"session_id": get_session[0].pk,
+					"start_time": [],
+					"number_of_appointments": quantity,
+					"duration": duration,
+				}
+
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
+
+	#################################################################################################################################
+
+	# process un-authenticated user and they cannot book bulk appointments, therefore only 'single-event'.
+	if request.method == "POST" and not request.user.is_authenticated:
 		email = request.POST['email']
 		session_name = request.POST['event-name']
+
 		if User.objects.filter(email=email).exists():
-			# redirect to login page
+			# redirect to login page incase the email already exists.
 			pass
 
-		# for this doctor or therapist get the consultation session for pricing
-		if(isinstance(profile_obj, Doctor)):
-			if 'single-event' in request.POST:
-				# booking a single appointment.
-				get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=1)
-				if get_session.exists():
+		# for this doctor get the session to determine pricing for a single appointment.
+		if isinstance(profile_obj, Doctor) and 'single-event' in request.POST:
+			get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=1)
+			start_time = request.POST['edate']
+			duration = request.POST['duration']
 
-					new_session = get_session[0]
-					start_time = request.POST['edate']
-					duration = request.POST['duration']
+			# session found to get the price and the slot is available to book with the doctor.
+			if get_session.exists() and not Appointment.objects.filter(doctor=profile_obj, start_time=start_time).exists():
+				cacheData = {
+					"consultant": 'doctor',
+					"consultant_id": profile_obj.pk,
+					"patient_email": email,
+					"event_type": 'single-event',
+					"session_id": get_session[0].pk,
+					"start_time": start_time,
+					"duration": duration,
+				}
 
-					cacheData = {
-						"consultant": 'doctor',
-						"consultant_id": profile_obj.pk,
-						"patient_email": email,
-						"event_type": 'single-event',
-						"session_id":new_session.pk,
-						"start_time": start_time,
-						"duration": duration,
-					}
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
 
-					if not Appointment.objects.filter(doctor=profile_obj, start_time=start_time).exists():
-						cache.set(request.session.session_key, cacheData, 600)
-						# set this object in the cache for 5 minutes.
-						return redirect('payment:landing-page')
-			else:
-				# bulk booking with doctor.
-				pass
+		# for this therapist get the session to determine pricing for a single appointment.
+		if isinstance(profile_obj, Therapist) and 'single-event' in request.POST:
+			get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=1)
+			start_time = request.POST['edate']
+			duration = request.POST['duration']
 
-		elif(isinstance(profile_obj, Therapist)):
-			if 'single-event' in request.POST:
-				# booking a single appointment.
-				get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=1)
-				if get_session.exists():
+			# session found to get the price and the slot is available to book with the therapist.
+			if get_session.exists() and not Appointment.objects.filter(therapist=profile_obj, start_time=start_time).exists():
+				cacheData = {
+					"consultant": 'therapist',
+					"consultant_id": profile_obj.pk,
+					"patient_email": email,
+					"event_type": 'single-event',
+					"session_id": get_session[0].pk,
+					"start_time": start_time,
+					"duration": duration,
+				}
 
-					new_session = get_session[0]
-					start_time = request.POST['edate']
-					duration = request.POST['duration']
-
-					cacheData = {
-						"consultant": 'therapist',
-						"consultant_id": profile_obj.pk,
-						"patient_email": email,
-						"event_type": 'single-event',
-						"session_id":new_session.pk,
-						"start_time": start_time,
-						"duration": duration,
-					}
-
-					if not Appointment.objects.filter(therapist=profile_obj, start_time=start_time).exists():
-						cache.set(request.session.session_key, cacheData, 600)
-						return redirect('payment:landing-page')
-			else:
-				# bulk-booking with therapist
-				pass
+				cache.set(request.session.session_key, cacheData, 600)
+				return redirect('payment:landing-page')
 
 	return render(request, "booking/view_booking_schedule.html")
