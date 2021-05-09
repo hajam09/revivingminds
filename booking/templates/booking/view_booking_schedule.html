@@ -8,14 +8,14 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
 <meta name="viewport" content="width=1024">
 <style type="text/css">
-   .overlay {
-   height: 7%;
-   }
-   #articleBody p {
-   text-align: justify;
-   }
-/*   footer{
-    	clear: both;
+    .overlay {
+    height: 7%;
+    }
+    #articleBody p {
+    text-align: justify;
+    }
+    /*   footer{
+    clear: both;
     border: 1px groove #aaaaaa;
     background: blue;
     color: White;
@@ -47,7 +47,7 @@
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
                                             <form id="add-event" method="POST">
-                                            	{% csrf_token %}
+                                                {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div class="p-3 mb-2 bg-dark text-white">New Booking</div>
                                                     <br>
@@ -90,7 +90,7 @@
                                                     <input name="create-appointment-for-unauthenticated-user" hidden>
                                                     <input name="single-event" hidden>
                                                     <div>
-                                                    	<div class="form-group">
+                                                        <div class="form-group">
                                                             <label>Email</label>
                                                             <input type="email" name="email" class="form-control" required>
                                                         </div>
@@ -136,192 +136,191 @@
         </div>
     </section>
 </main>
-
 <script>
-   $(window).on("scroll", function()
-   {
-   		if ($(this).scrollTop() > 10)
-   		{
-   			$("nav.navbar").addClass("mybg-dark");
-   			$("nav.navbar").addClass("navbar-shrink");
-   		}
-   		else
-   		{
-   			$("nav.navbar").removeClass("mybg-dark");
-   			$("nav.navbar").removeClass("navbar-shrink");
-   		}
-   	});
+    $(window).on("scroll", function()
+    {
+    	if ($(this).scrollTop() > 10)
+    	{
+			$("nav.navbar").addClass("mybg-dark");
+    		$("nav.navbar").addClass("navbar-shrink");
+    	}
+    	else
+    	{
+    		$("nav.navbar").removeClass("mybg-dark");
+    		$("nav.navbar").removeClass("navbar-shrink");
+    	}
+    });
+    
+    function getScheduledAppointments()
+    {
+    
+    	var appointments = [];
+    	{% if existing_appointments %}
+    
+    	{% for a in existing_appointments %}
+    
+	    appointments.push(
+	    	{
+	    		title: '{{ a.session_type.session_name }}',
+	    		start: '{{ a.get_start_time_in_fomat }}',
+	    		end: '{{ a.get_end_time_in_fomat }}'
+	    	}
+	    );
+    
+    	{% endfor %}
+    
+    	{% endif %}
+    	return appointments
+    }
+    
+    var calendarEl = document.getElementById('calendar');
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+    	themeSystem: 'bootstrap4',
+    	locale: 'en-gb',
+    	initialView: 'timeGridWeek',
+    	timeZone: 'UTC',
+    	height: 'auto',
+    	headerToolbar: {
+	    	left: 'prev,next today',
+	    	center: 'title',
+	    	right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+	    },
+    	selectable: true,
+    	// unselectAuto: true,
+    	//selectOverlap: false,//Determines whether the user is allowed to select periods of time that are occupied by events.
+    	slotDuration: '00:30:00',
+	    businessHours: {
+	    	daysOfWeek: [ 1, 2, 3, 4, 5 ],
+	    	startTime: '08:00',
+	    	endTime: '18:00'
+	    },
+	    buttonText :{
+	    	today:    'TODAY',
+	    	month:    'MONTH',
+	    	week:     'WEEK',
+	    	day:      'DAY',
+	    	list:     'LIST'
+	    },
+    	events: getScheduledAppointments(),
+    	navLinks: true,
+    	navLinkWeekClick: function(weekStart, jsEvent) {
+	    	console.log('week start', weekStart.toISOString());
+	    	console.log('coords', jsEvent.pageX, jsEvent.pageY);
+	    },
+    	nowIndicator:true,
+	    // selectAllow: function(selectInfo) {
+	    //     console.log(selectInfo);
+	    //     console.log("selectInfo");
+	    //     // Exact programmatic control over where the user can select.
+	    //     // use to open a model and set the date for the clicked slot.
+	    // },
+    	dateClick: function( info ) {
+	    // Exact programmatic control over where the user can select.
+	    // use to open a model and set the date for the clicked slot.
+	    // console.log('Clicked on: ' + info.dateStr);
+	    // console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+	    // console.log('Current view: ' + info.view.type);
+	    // info.dayEl.style.backgroundColor = 'red';
+	    },
+    	select: function( selectionInfo ) {
+		    if (selectionInfo.allDay)
+		    {
+			    // User clicked the slot in the MONTH view.
+			    // Only reveal the modal if user clicked the weekly or daily view.
+			    return;
+		    }
+    
+		    // checking if the clicked date is in the weekends.
+		    var scheduleDate = new Date();
+		    var clickedDate = selectionInfo.startStr.split("T")[0].split("-");
+		    var clickedHours = selectionInfo.startStr.replace("Z", "").split("T")[1].split(":");
+		    
+		    scheduleDate.setFullYear(parseInt(clickedDate[0]));
+		    // javascript's Date months start with 0, so 9 is a 10th month and it is October
+		    scheduleDate.setMonth(parseInt(clickedDate[1])-1);
+		    scheduleDate.setDate(parseInt(clickedDate[2]));
+		    
+		    scheduleDate.setHours(parseInt(clickedHours[0]));
+		    scheduleDate.setMinutes(parseInt(clickedHours[1]));
+		    scheduleDate.setSeconds(parseInt(clickedHours[2]));
+    
+		    if(scheduleDate.getDay() == 6 || scheduleDate.getDay() == 0) return;
+		    
+		    // if clicked date is in the past, prevent the user from booking an appointment.
+		    // for more robust check, implement it in the back-end as well.
+		    var now = new Date();
+		    if (scheduleDate < now) return;
+		    
+		    // business hours values.
+		    var startHour = 8;
+		    var startMinute = 0;
+		    var startSecond = 0;
+		    var endHour = 18;
+		    var endMinute = 0;
+		    var endSecond = 0;
+    
+		    // to prevent click if outside business hours.
+		    var workStartHrs = new Date();
+		    workStartHrs.setFullYear(parseInt(clickedDate[0]));
+		    workStartHrs.setMonth(parseInt(clickedDate[1])-1);
+		    workStartHrs.setDate(parseInt(clickedDate[2]));
+		    workStartHrs.setHours(startHour);
+		    workStartHrs.setMinutes(startMinute);
+		    workStartHrs.setSeconds(startSecond);
+		    
+		    var workEndHrs = new Date();
+		    workEndHrs.setFullYear(parseInt(clickedDate[0]));
+		    workEndHrs.setMonth(parseInt(clickedDate[1])-1);
+		    workEndHrs.setDate(parseInt(clickedDate[2]));
+		    workEndHrs.setHours(endHour);
+		    workEndHrs.setMinutes(endMinute);
+		    workEndHrs.setSeconds(endSecond);
+    
+    		if(scheduleDate<workStartHrs || scheduleDate>=workEndHrs) return;
+    
+    
+		    // adding and clearing the duration slots to prevent users from going over the business end hours.
+		    var appointmentDurationComponent = `
+		    <option id="30_slot" value="30">30 minutes</option>
+		    <option id="60_slot" value="60">60 minutes</option>
+		    <option id="90_slot" value="90">90 minutes</option>
+		    <option id="120_slot" value="120">120 minutes</option>
+		    `;
 
-   	function getScheduledAppointments()
-   	{
-
-   		var appointments = [];
-   		{% if existing_appointments %}
-
-   		{% for a in existing_appointments %}
-
-   			appointments.push(
-	   			{
-	   				title: '{{ a.session_type.session_name }}',
-	   				start: '{{ a.get_start_time_in_fomat }}',
-	   				end: '{{ a.get_end_time_in_fomat }}'
-	   			}
-   			);
-
-   		{% endfor %}
-
-   		{% endif %}
-   		return appointments
-   	}
-   
-   var calendarEl = document.getElementById('calendar');
-   
-   var calendar = new FullCalendar.Calendar(calendarEl, {
-	themeSystem: 'bootstrap4',
-	locale: 'en-gb',
-	initialView: 'timeGridWeek',
-	timeZone: 'UTC',
-	height: 'auto',
-	headerToolbar: {
-		left: 'prev,next today',
-		center: 'title',
-		right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-	 },
-	 selectable: true,
-	 // unselectAuto: true,
-	 //selectOverlap: false,//Determines whether the user is allowed to select periods of time that are occupied by events.
-	 slotDuration: '00:30:00',
-	 businessHours: {
-		daysOfWeek: [ 1, 2, 3, 4, 5 ],
-		startTime: '08:00',
-		endTime: '18:00'
-	 },
-	 buttonText :{
-		today:    'TODAY',
-		month:    'MONTH',
-		week:     'WEEK',
-		day:      'DAY',
-		list:     'LIST'
-		},
-	 events: getScheduledAppointments(),
-	 navLinks: true,
-	 navLinkWeekClick: function(weekStart, jsEvent) {
-		console.log('week start', weekStart.toISOString());
-		console.log('coords', jsEvent.pageX, jsEvent.pageY);
-	 },
-	 nowIndicator:true,
-	 // selectAllow: function(selectInfo) {
-	 //     console.log(selectInfo);
-	 //     console.log("selectInfo");
-	 //     // Exact programmatic control over where the user can select.
-	 //     // use to open a model and set the date for the clicked slot.
-	 // },
-	 dateClick: function( info ) {
-		// Exact programmatic control over where the user can select.
-		// use to open a model and set the date for the clicked slot.
-		// console.log('Clicked on: ' + info.dateStr);
-		// console.log('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-		// console.log('Current view: ' + info.view.type);
-		// info.dayEl.style.backgroundColor = 'red';
-	 },
-	 select: function( selectionInfo ) {
-		if (selectionInfo.allDay)
-		{
-			// User clicked the slot in the MONTH view.
-			// Only reveal the modal if user clicked the weekly or daily view.
-			return;
+    		$('#appointmentDuration').empty();
+    		$('#appointmentDuration').append(appointmentDurationComponent);
+    
+		    if (clickedHours[0] == "16" && clickedHours[1] == "30")
+		    {
+			    // user selected 4:30pm slot, only upto 90 minutes left. remove 120minutes slots.
+			    $('#120_slot').remove();
+		    }
+    
+		    if (clickedHours[0] == "17" && clickedHours[1] == "00")
+		    {
+			    // user selected 5:00pm slot, only upto 60 minutes left. remove 120minutes and 90minutes slots.
+			    $('#120_slot').remove();
+			    $('#90_slot').remove();
+		    }
+    
+		    if (clickedHours[0] == "17" && clickedHours[1] == "30")
+		    {
+			    // user selected 5:30pm slot, only upto 30 minutes left. remove 120minutes, 90minutes and 60 minutes slots.
+			    $('#120_slot').remove();
+			    $('#90_slot').remove();
+			    $('#60_slot').remove();
+		    }
+    
+    		$('#modalTriggerButton').click();
+    
+		    // set the date and time here
+		    $("#appointmentDateAndTime").val(selectionInfo.startStr.replace("Z", ""));
+		    	console.log(selectionInfo);
 		}
-
-		// checking if the clicked date is in the weekends.
-		var scheduleDate = new Date();
-		var clickedDate = selectionInfo.startStr.split("T")[0].split("-");
-		var clickedHours = selectionInfo.startStr.replace("Z", "").split("T")[1].split(":");
-
-		scheduleDate.setFullYear(parseInt(clickedDate[0]));
-		// javascript's Date months start with 0, so 9 is a 10th month and it is October
-		scheduleDate.setMonth(parseInt(clickedDate[1])-1);
-		scheduleDate.setDate(parseInt(clickedDate[2]));
-
-		scheduleDate.setHours(parseInt(clickedHours[0]));
-		scheduleDate.setMinutes(parseInt(clickedHours[1]));
-		scheduleDate.setSeconds(parseInt(clickedHours[2]));
-
-		if(scheduleDate.getDay() == 6 || scheduleDate.getDay() == 0) return;
-
-		// if clicked date is in the past, prevent the user from booking an appointment.
-		// for more robust check, implement it in the back-end as well.
-		var now = new Date();
-		if (scheduleDate < now) return;
-
-		// business hours values.
-		var startHour = 8;
-		var startMinute = 0;
-		var startSecond = 0;
-		var endHour = 18;
-		var endMinute = 0;
-		var endSecond = 0;
-
-		// to prevent click if outside business hours.
-		var workStartHrs = new Date();
-		workStartHrs.setFullYear(parseInt(clickedDate[0]));
-		workStartHrs.setMonth(parseInt(clickedDate[1])-1);
-		workStartHrs.setDate(parseInt(clickedDate[2]));
-		workStartHrs.setHours(startHour);
-		workStartHrs.setMinutes(startMinute);
-		workStartHrs.setSeconds(startSecond);
-
-		var workEndHrs = new Date();
-		workEndHrs.setFullYear(parseInt(clickedDate[0]));
-		workEndHrs.setMonth(parseInt(clickedDate[1])-1);
-		workEndHrs.setDate(parseInt(clickedDate[2]));
-		workEndHrs.setHours(endHour);
-		workEndHrs.setMinutes(endMinute);
-		workEndHrs.setSeconds(endSecond);
-
-		if(scheduleDate<workStartHrs || scheduleDate>=workEndHrs) return;
-
-
-		// adding and clearing the duration slots to prevent users from going over the business end hours.
-		var appointmentDurationComponent = `
-		<option id="30_slot" value="30">30 minutes</option>
-        <option id="60_slot" value="60">60 minutes</option>
-        <option id="90_slot" value="90">90 minutes</option>
-        <option id="120_slot" value="120">120 minutes</option>
-		`;
-
-		$('#appointmentDuration').empty();
-		$('#appointmentDuration').append(appointmentDurationComponent);
-
-		if (clickedHours[0] == "16" && clickedHours[1] == "30")
-		{
-			// user selected 4:30pm slot, only upto 90 minutes left. remove 120minutes slots.
-			$('#120_slot').remove();
-		}
-
-		if (clickedHours[0] == "17" && clickedHours[1] == "00")
-		{
-			// user selected 5:00pm slot, only upto 60 minutes left. remove 120minutes and 90minutes slots.
-			$('#120_slot').remove();
-			$('#90_slot').remove();
-		}
-
-		if (clickedHours[0] == "17" && clickedHours[1] == "30")
-		{
-			// user selected 5:30pm slot, only upto 30 minutes left. remove 120minutes, 90minutes and 60 minutes slots.
-			$('#120_slot').remove();
-			$('#90_slot').remove();
-			$('#60_slot').remove();
-		}
-
-		$('#modalTriggerButton').click();
-
-		// set the date and time here
-		$("#appointmentDateAndTime").val(selectionInfo.startStr.replace("Z", ""));
-		console.log(selectionInfo);
-	 }
-   });
-   
-   calendar.render();
-   
+	});
+    
+    calendar.render();
+    
 </script>
 {% endblock %}
