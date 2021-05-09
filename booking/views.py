@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.http import Http404
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.contrib import messages
 import random
 import string
 
@@ -55,6 +56,9 @@ def view_schedule(request, profile):
 
 				cache.set(request.session.session_key, cacheData, 600)
 				return redirect('payment:landing-page')
+			else:
+				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
+				return redirect('booking:view_schedule', profile=profile)
 
 		# for this therapist get the session to determine pricing for a single appointment.
 		if isinstance(profile_obj, Therapist) and 'single-event' in request.POST:
@@ -76,6 +80,9 @@ def view_schedule(request, profile):
 
 				cache.set(request.session.session_key, cacheData, 600)
 				return redirect('payment:landing-page')
+			else:
+				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
+				return redirect('booking:view_schedule', profile=profile)
 
 		# for this doctor get the session to determine pricing for a bulk appointment.
 		if isinstance(profile_obj, Doctor) and 'multiple-event' in request.POST:
@@ -152,6 +159,10 @@ def view_schedule(request, profile):
 
 				cache.set(request.session.session_key, cacheData, 600)
 				return redirect('payment:landing-page')
+			else:
+				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
+				return redirect('booking:view_schedule', profile=profile)
+
 
 		# for this therapist get the session to determine pricing for a single appointment.
 		if isinstance(profile_obj, Therapist) and 'single-event' in request.POST:
@@ -173,6 +184,9 @@ def view_schedule(request, profile):
 
 				cache.set(request.session.session_key, cacheData, 600)
 				return redirect('payment:landing-page')
+			else:
+				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
+				return redirect('booking:view_schedule', profile=profile)
 
 	existing_appointments = Appointment.objects.filter(doctor=profile_obj) if isinstance(profile_obj, Doctor) else Appointment.objects.filter(doctor=profile_obj)
 
