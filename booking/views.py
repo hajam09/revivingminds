@@ -163,7 +163,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
@@ -188,7 +188,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
