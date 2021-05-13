@@ -57,6 +57,8 @@ class ProductLandingPageView(TemplateView):
 				messages.add_message(self.request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=therapist.slug)
 
+		# no need to check if appointments are pre-booked when applying bulk appointments.
+
 		return super().get(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
@@ -113,21 +115,23 @@ class ProductLandingPageView(TemplateView):
 			# cacheData = {"consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": [], "number_of_appointments": quantity, "duration": duration, }
 			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
 			get_session = Session.objects.get(id=cacheData['session_id'])
+			start_date_and_time = cacheData['start_time']
 
-			def getAppointmentsForDoctor( start_time ):
-				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-				new_end_time = new_start_time + timedelta(minutes = int(duration))
+			def getAppointmentsForDoctor( index ):
+				new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+				start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+				end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
 				return Appointment(
 					doctor=doctor,
-					start_time=new_start_time,
-					end_time=new_end_time,
+					start_time=start_dt_for_each_week,
+					end_time=end_dt_for_each_week,
 					session_type=get_session,
 					zoom_link=''
 				)
 
 			appointments = [
-				getAppointmentsForDoctor(t)
-				for t in cacheData['start_time']
+				getAppointmentsForDoctor(i)
+				for i in range(int(cacheData['number_of_appointments']))
 			]
 
 		# authenticated user books bulk appointment with the therapist.	
@@ -135,21 +139,23 @@ class ProductLandingPageView(TemplateView):
 			# cacheData = { "consultant_id": profile_obj.pk, "patient_email": request.user.email, "session_id": get_session[0].pk, "start_time": [], "number_of_appointments": quantity, "duration": duration, }
 			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
 			get_session = Session.objects.get(id=cacheData['session_id'])
+			start_date_and_time = cacheData['start_time']
 
-			def getAppointmentsForTherapist( start_time ):
-				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-				new_end_time = new_start_time + timedelta(minutes = int(duration))
+			def getAppointmentsForTherapist( index ):
+				new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+				start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+				end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
 				return Appointment(
 					therapist=therapist,
-					start_time=new_start_time,
-					end_time=new_end_time,
+					start_time=start_dt_for_each_week,
+					end_time=end_dt_for_each_week,
 					session_type=get_session,
 					zoom_link=''
 				)
 
 			appointments = [
-				getAppointmentsForTherapist(t)
-				for t in cacheData['start_time']
+				getAppointmentsForTherapist(i)
+				for i in range(int(cacheData['number_of_appointments']))
 			]
 
 		# un-authenticated user books a single appointment with the doctor.	

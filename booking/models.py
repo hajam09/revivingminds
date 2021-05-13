@@ -17,8 +17,11 @@ class Session(models.Model):
 	max_mins = models.IntegerField()# max number of minutes the session can last.
 
 	def __str__(self):
-		return "{}, {}, {}".format(self.session_name, self.cost, self.quantity)
-
+		if self.therapist:
+			return "{} session with {} for {} appointments with session id: {}".format(self.session_name, self.therapist.user, self.quantity, self.id)
+		if self.doctor:
+			return "{} session with {} for {} appointments with session id: {}".format(self.session_name, self.doctor.user, self.quantity, self.id)
+			
 	def get_display_price(self):
 		return "{0:.2f}".format(self.cost / 100)
 

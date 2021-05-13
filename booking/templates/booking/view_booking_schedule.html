@@ -82,7 +82,7 @@
                                                                 <label>Event Name</label>
                                                                 <select class="form-control" name="event-name">
                                                                     <option value="Consultation">Consultation</option>
-                                                                    <option value="Theraphy">Theraphy</option>
+                                                                    <option value="Therapy">Therapy</option>
                                                                 </select>
                                                             </div>
                                                             <div class="form-group">
@@ -110,7 +110,7 @@
                                                             <div class="form-group">
                                                                 <label>Event Name</label>
                                                                 <select class="form-control" name="event-name">
-                                                                    <option value="Theraphy">Theraphy</option>
+                                                                    <option value="Therapy">Therapy</option>
                                                                 </select>
                                                             </div>
                                                             <div class="form-group">
@@ -120,9 +120,9 @@
                                                             <div class="form-group">
                                                                 <label>Number of appointments</label>
                                                                 <select class="form-control" name="numberOfAppointments" id="numberOfAppointments">
-                                                                    {% if theraphy_sessions %}
+                                                                    {% if therapy_sessions %}
 
-                                                                        {% for s in theraphy_sessions %}
+                                                                        {% for s in therapy_sessions %}
 
                                                                             <option value="{{s.quantity}}">{{s.quantity}}</option>
 

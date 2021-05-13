@@ -56,7 +56,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
@@ -80,15 +80,17 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
 
 		# for this doctor get the session to determine pricing for a bulk appointment.
 		if isinstance(profile_obj, Doctor) and 'multiple-event' in request.POST:
-			quantity = request.POST['number_of_appointments']
+			quantity = request.POST['numberOfAppointments']
 			get_session = Session.objects.filter(doctor=profile_obj, session_name__iexact=session_name, quantity=quantity)
+			duration = request.POST['duration']
+			start_time = request.POST['edate']
 
 			# session found to get the price for bulk-appointments.
 			# no need to check if appointment slot is free for each week. Raise alert/ticket to the appropriate consultant for each overlapping appointment.
@@ -99,18 +101,20 @@ def view_schedule(request, profile):
 					"patient_email": request.user.email,
 					"event_type": 'multiple-event',
 					"session_id": get_session[0].pk,
-					"start_time": [],
+					"start_time": start_time,
 					"number_of_appointments": quantity,
 					"duration": duration,
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 
 		# for this therapist get the session to determine pricing for a bulk appointment.
 		if isinstance(profile_obj, Therapist) and 'multiple-event' in request.POST:
-			quantity = request.POST['number_of_appointments']
+			quantity = request.POST['numberOfAppointments']
 			get_session = Session.objects.filter(therapist=profile_obj, session_name__iexact=session_name, quantity=quantity)
+			start_time = request.POST['edate']
+			duration = request.POST['duration']
 
 			# session found to get the price for bulk-appointments.
 			# no need to check if appointment slot is free for each week. Raise alert/ticket to the appropriate consultant for each overlapping appointment.
@@ -121,13 +125,13 @@ def view_schedule(request, profile):
 					"patient_email": request.user.email,
 					"event_type": 'multiple-event',
 					"session_id": get_session[0].pk,
-					"start_time": [],
+					"start_time": start_time,
 					"number_of_appointments": quantity,
 					"duration": duration,
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				# return redirect('payment:landing-page')
+				return redirect('payment:landing-page')
 
 	#################################################################################################################################
 
@@ -190,10 +194,10 @@ def view_schedule(request, profile):
 				return redirect('booking:view_schedule', profile=profile)
 
 	existing_appointments = Appointment.objects.filter(doctor=profile_obj) if isinstance(profile_obj, Doctor) else Appointment.objects.filter(therapist=profile_obj)
-	theraphy_sessions = Session.objects.filter(doctor=profile_obj, session_name__iexact='theraphy') if isinstance(profile_obj, Doctor) else Session.objects.filter(therapist=profile_obj, session_name__iexact='theraphy')
+	therapy_sessions = Session.objects.filter(doctor=profile_obj, session_name__iexact='therapy') if isinstance(profile_obj, Doctor) else Session.objects.filter(therapist=profile_obj, session_name__iexact='therapy')
 
 	context = {
 		"existing_appointments": existing_appointments,
-		"theraphy_sessions": theraphy_sessions
+		"therapy_sessions": therapy_sessions
 	}
 	return render(request, "booking/view_booking_schedule.html", context)
