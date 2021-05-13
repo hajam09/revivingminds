@@ -12,6 +12,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.contrib import messages
 import random
+from django.utils import timezone
 import string
 
 def view_schedule(request, profile):
@@ -55,7 +56,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
@@ -79,7 +80,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
@@ -104,7 +105,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 
 		# for this therapist get the session to determine pricing for a bulk appointment.
 		if isinstance(profile_obj, Therapist) and 'multiple-event' in request.POST:
@@ -126,7 +127,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 
 	#################################################################################################################################
 
@@ -158,7 +159,7 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
@@ -183,14 +184,16 @@ def view_schedule(request, profile):
 				}
 
 				cache.set(request.session.session_key, cacheData, 600)
-				return redirect('payment:landing-page')
+				# return redirect('payment:landing-page')
 			else:
 				messages.add_message(request,messages.INFO,"Unfortunately the slot has been booking by someone else. Please try another one.")
 				return redirect('booking:view_schedule', profile=profile)
 
-	existing_appointments = Appointment.objects.filter(doctor=profile_obj) if isinstance(profile_obj, Doctor) else Appointment.objects.filter(doctor=profile_obj)
+	existing_appointments = Appointment.objects.filter(doctor=profile_obj) if isinstance(profile_obj, Doctor) else Appointment.objects.filter(therapist=profile_obj)
+	theraphy_sessions = Session.objects.filter(doctor=profile_obj, session_name__iexact='theraphy') if isinstance(profile_obj, Doctor) else Session.objects.filter(therapist=profile_obj, session_name__iexact='theraphy')
 
 	context = {
-		"existing_appointments": existing_appointments
+		"existing_appointments": existing_appointments,
+		"theraphy_sessions": theraphy_sessions
 	}
 	return render(request, "booking/view_booking_schedule.html", context)

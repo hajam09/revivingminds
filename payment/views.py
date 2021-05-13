@@ -3,6 +3,7 @@ from accounts.models import Patient
 from accounts.models import Therapist
 from booking.models import Appointment
 from booking.models import Session
+from payment.models import Payment
 from datetime import datetime
 from datetime import timedelta
 from django.conf import settings
@@ -191,8 +192,6 @@ class ProductLandingPageView(TemplateView):
 					)
 				]
 
-		print(cacheData)
-
 		context.update({
 			"appointments": appointments,
 			"STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
@@ -201,18 +200,22 @@ class ProductLandingPageView(TemplateView):
 
 class CreateCheckoutSessionView(View):
 	def get(self, request, *args, **kwargs):
-		appointments = cache.get(self.request.session.session_key)
+		cacheData = cache.get(self.request.session.session_key)
 
-		if appointments == None:
+		if cacheData == None:
+			messages.add_message(self.request,messages.INFO,"Error occured. Please try again.")
 			return redirect('mainapp:nav_bar_pages', folder='healthcare', page='appointment_booking_and_prices')
+
+		# renew the cache so that the data wont be cleared during payment process.
+		cache.set(self.request.session.session_key, cacheData, 600)
 
 	def post(self, request, *args, **kwargs):
 
 		therapy_session_id = self.kwargs["pk"]
 		session_type = Session.objects.get(id=therapy_session_id)
 		appointments = cache.get(self.request.session.session_key)
-
 		YOUR_DOMAIN = "http://127.0.0.1:8000"
+		cacheData = cache.get(self.request.session.session_key)
 
 		checkout_session = stripe.checkout.Session.create(
 			payment_method_types=['card'],
@@ -228,15 +231,13 @@ class CreateCheckoutSessionView(View):
 					'quantity': 1,
 				},
 			],
-			metadata={
-				"session_type_id": session_type.id
-			},
+			metadata=cacheData,
 			mode='payment',
 			success_url=YOUR_DOMAIN + '/payment/success/',
 			cancel_url=YOUR_DOMAIN + '/payment/cancel/',
 		)
 		return JsonResponse({
-			'id': "checkout_session.id"
+			'id': checkout_session.id
 		})
 
 @csrf_exempt
@@ -257,74 +258,133 @@ def stripe_webhook(request):
 		return HttpResponse(status=400)
 
 	# Handle the checkout.session.completed event
-	if event['type'] == 'checkout.session.completed':
+	if event['type'] == 'checkout.session.completed':# or event['type'] == 'checkout.session.async_payment_succeeded':
 		session = event['data']['object']
-
+		
 		# Fulfill the purchase...
-		# will not work as this is not a class based view.
-		# need to check if request contants session key and other django stuff.
-		cacheData = cache.get(self.request.session.session_key)
 		customer_email = session["customer_details"]["email"]
-		payment_status = session["payment_details"]
+		payment_status = session["payment_status"]
+		cacheData = session["metadata"]
+		userObject = None
+		print("event: ", event)
 
-		if payment_status == "paid" and cacheData['consultant'] == "doctor":
+		get_session = Session.objects.get(id=cacheData['session_id'])
+
+		if request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
+			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+			print("logged in with doctor and single-event paid")
+
+		elif request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
+			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+
+		elif request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'multiple-event' and payment_status == 'paid':
 			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
 
-			if cacheData['event_type'] == 'single-event':
-				start_time = cacheData['start_time']
-				duration = cacheData['duration']
-				patient_email = cacheData['patient_email']
+		elif request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'multiple-event' and payment_status == 'paid':
+			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
 
-				if customer_email != patient_email:
-					return
+		elif not request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
+			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+			patient_email = cacheData['patient_email']
+			temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
 
-				get_session = Session.objects.get(id=cacheData['session_id'])
-				temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+			userObject = createNewUser(cacheData['patient_email'], temp_pass)
+			newPatient = createNewPatient(userObject)
+			sendMailToNewUser(cacheData['patient_email'], temp_pass)
+			createSingleAppointmentWithDoctor(doctor, cacheData['start_time'], get_session, newPatient)
 
-				new_user = User(
-						username=patient_email,
-						email=patient_email,
-						password=temp_pass,
-					)
-				new_user.save()
+		elif not request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
+			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+			patient_email = cacheData['patient_email']
+			temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
 
-				new_patient = Patient(
-						user=new_user,
-						date_of_birth=datetime.today().strftime('%Y-%m-%d')
-					)
-				new_patient.save()
+			userObject = createNewUser(cacheData['patient_email'], temp_pass)
+			newPatient = createNewPatient(userObject)
+			sendMailToNewUser(cacheData['patient_email'], temp_pass)
+			createSingleAppointmentWithTherapist(therapist, cacheData['start_time'], get_session, newPatient)
 
-				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-				new_end_time = new_start_time + timedelta(minutes = int(duration))
 
-				new_appointment = Appointment(
-						doctor=doctor,
-						start_time=new_start_time,
-						end_time=new_end_time,
-						session_type=get_session,
-						zoom_link=''
-					)
-				new_appointment.save()
-				new_appointment.patients.add(new_patient)
+		# create a payment object for every payment for record keeping.
+		# if userObject != None and payment_status == 'paid':
+		# 	Payment.object.create(
+		# 		user=userObject,
+		# 		payment_status=payment_status.upper(),
+		# 		paymentID=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+		# 		amount=get_session.get_display_price(),
+		# 		session_type=get_session
+		# 	)
 
-				# TODO: create a payment object.
-				# TODO: send email to the patient that the account has been created and to change the password.
-				# TODO: check for appointments with doctor and the startime. if > 1, then send an email to the doctor.
-				# TODO: generate a zoom link and set it to the appointment.
 
-				send_mail(
-					subject='',
-					message='',
-					recipient_list=[patient_email],
-					from_email=''
-				)
-			else:
-				
-				pass
-			pass
+			# 	new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+			# 	new_end_time = new_start_time + timedelta(minutes = int(duration))
 
-		print(session)
+			# 	new_appointment = Appointment(
+			# 			doctor=doctor,
+			# 			start_time=new_start_time,
+			# 			end_time=new_end_time,
+			# 			session_type=get_session,
+			# 			zoom_link=''
+			# 		)
+			# 	new_appointment.save()
+			# 	new_appointment.patients.add(new_patient)
+
+			# 	# TODO: check for appointments with doctor and the startime. if > 1, then send an email to the doctor.
+			# 	# TODO: generate a zoom link and set it to the appointment.
 
 
 	# Passed signature verification
 	return HttpResponse(status=200)
+
+def createNewUser(patient_email, temp_pass):
+	new_user = User(
+		username=patient_email,
+		email=patient_email,
+		password=temp_pass,
+		)
+	new_user.save()
+	return new_user
+
+def createNewPatient(newUser):
+	new_patient = Patient(
+		user=new_user,
+		date_of_birth=datetime.today().strftime('%Y-%m-%d')
+		)
+	new_patient.save()
+	return new_patient
+
+def sendMailToNewUser(patient_email, temp_pass):
+	message = """
+		Dear user,
+
+		Welcome to Reviving Minds, thank you for your joining our service.
+		We have created an account for you to unlock more features.
+		Please login with the following details and change password as soon as you can.
+
+		email: {},
+		password: {}
+
+		Thanks,
+		The Reviving Minds Team
+	""".format(patient_email, temp_pass)
+	send_mail(
+		subject='Welcome to Reviving Minds',
+		message=message,
+		recipient_list=[patient_email],
+		from_email=settings.EMAIL_HOST_USER
+	)
+	return
+
+def createSingleAppointmentWithDoctor(doctor, start_time, get_session, new_patient):
+	new_appointment = Appointment(
+		doctor=doctor,
+		start_time=new_start_time,
+		end_time=new_end_time,
+		session_type=get_session,
+		zoom_link=''
+		)
+	new_appointment.save()
+	new_appointment.patients.add(new_patient)
+	return
+
+def createSingleAppointmentWithTherapist():
+	return
