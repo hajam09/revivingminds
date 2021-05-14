@@ -3,10 +3,11 @@ from accounts.models import Patient
 from accounts.models import Therapist
 from booking.models import Appointment
 from booking.models import Session
-from payment.models import Payment
 from datetime import datetime
 from datetime import timedelta
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -17,7 +18,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-from django.contrib import messages
+from payment.models import Payment
 import json
 import random
 import string
@@ -212,7 +213,7 @@ class CreateCheckoutSessionView(View):
 			messages.add_message(self.request,messages.INFO,"Error occured. Please try again.")
 			return redirect('mainapp:nav_bar_pages', folder='healthcare', page='appointment_booking_and_prices')
 
-		# renew the cache so that the data wont be cleared during payment process.
+		# renew the cache so that the data won't be cleared during payment process.
 		cache.set(self.request.session.session_key, cacheData, 600)
 
 	def post(self, request, *args, **kwargs):
@@ -271,72 +272,127 @@ def stripe_webhook(request):
 		customer_email = session["customer_details"]["email"]
 		payment_status = session["payment_status"]
 		cacheData = session["metadata"]
-		userObject = None
-		print("event: ", event)
 
-		get_session = Session.objects.get(id=cacheData['session_id'])
+		# TODO: generate a zoom link and set it to the appointment.
 
-		if request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
-			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
-			print("logged in with doctor and single-event paid")
-
-		elif request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
-			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
-
-		elif request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'multiple-event' and payment_status == 'paid':
-			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
-
-		elif request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'multiple-event' and payment_status == 'paid':
-			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
-
-		elif not request.user.is_authenticated and cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
-			doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+		if cacheData and payment_status == 'paid':
+			get_session = Session.objects.get(id=cacheData['session_id'])
 			patient_email = cacheData['patient_email']
-			temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+			start_time = cacheData['start_time']
+			duration = cacheData['duration']
 
-			userObject = createNewUser(cacheData['patient_email'], temp_pass)
-			newPatient = createNewPatient(userObject)
-			sendMailToNewUser(cacheData['patient_email'], temp_pass)
-			createSingleAppointmentWithDoctor(doctor, cacheData['start_time'], get_session, newPatient)
-
-		elif not request.user.is_authenticated and cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event' and payment_status == 'paid':
-			therapist = Therapist.objects.get(id=cacheData['consultant_id'])
-			patient_email = cacheData['patient_email']
-			temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-
-			userObject = createNewUser(cacheData['patient_email'], temp_pass)
-			newPatient = createNewPatient(userObject)
-			sendMailToNewUser(cacheData['patient_email'], temp_pass)
-			createSingleAppointmentWithTherapist(therapist, cacheData['start_time'], get_session, newPatient)
+			try:
+				userObject = User.objects.get(email=patient_email)
+				patientObject = Patient.objects.get(user=userObject)
+			except(User.DoesNotExist, Patient.DoesNotExist):
+				# new patient enrolment into the system.
+				temp_pass = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+				userObject = createNewUser(patient_email, temp_pass)
+				patientObject = createNewPatient(userObject)
+				sendMailToNewUser(patient_email, temp_pass)
 
 
-		# create a payment object for every payment for record keeping.
-		# if userObject != None and payment_status == 'paid':
-		# 	Payment.object.create(
-		# 		user=userObject,
-		# 		payment_status=payment_status.upper(),
-		# 		paymentID=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
-		# 		amount=get_session.get_display_price(),
-		# 		session_type=get_session
-		# 	)
+			if cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'single-event':
+				doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				appointments = [
+					Appointment(
+						doctor=doctor,
+						start_time=new_start_time,
+						end_time=new_end_time,
+						session_type=get_session,
+						zoom_link=''
+					)
+				]
 
+				for i in appointments:
+					i.patients.add(patientObject)
 
-			# 	new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
-			# 	new_end_time = new_start_time + timedelta(minutes = int(duration))
+				Appointment.objects.bulk_create(appointments)
+				# TODO: raise alert if there is more than one appointment exists for this doctor between the start time and end time. then send an email to the doctor.
 
-			# 	new_appointment = Appointment(
-			# 			doctor=doctor,
-			# 			start_time=new_start_time,
-			# 			end_time=new_end_time,
-			# 			session_type=get_session,
-			# 			zoom_link=''
-			# 		)
-			# 	new_appointment.save()
-			# 	new_appointment.patients.add(new_patient)
+			elif cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event':
+				therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+				new_end_time = new_start_time + timedelta(minutes = int(duration))
+				appointments = [
+					Appointment(
+						therapist=therapist,
+						start_time=new_start_time,
+						end_time=new_end_time,
+						session_type=get_session,
+						zoom_link=''
+					)
+				]
+				
+				for i in appointments:
+					i.patients.add(patientObject)
 
-			# 	# TODO: check for appointments with doctor and the startime. if > 1, then send an email to the doctor.
-			# 	# TODO: generate a zoom link and set it to the appointment.
+				Appointment.objects.bulk_create(appointments)
+				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
 
+			elif cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'multiple-event':
+				doctor = Doctor.objects.get(id=cacheData['consultant_id'])
+				start_date_and_time = cacheData['start_time']
+
+				def getAppointmentsForDoctor( index ):
+					new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+					start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+					end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
+					return Appointment(
+						doctor=doctor,
+						start_time=start_dt_for_each_week,
+						end_time=end_dt_for_each_week,
+						session_type=get_session,
+						zoom_link=''
+					)
+
+				appointments = [
+					getAppointmentsForDoctor(i)
+					for i in range(int(cacheData['number_of_appointments']))
+				]
+
+				for i in appointments:
+					i.patients.add(patientObject)
+
+				Appointment.objects.bulk_create(appointments)
+				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
+
+			elif cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'multiple-event':
+				therapist = Therapist.objects.get(id=cacheData['consultant_id'])
+				start_date_and_time = cacheData['start_time']
+
+				def getAppointmentsForTherapist( index ):
+					new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+					start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+					end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
+					return Appointment(
+						therapist=therapist,
+						start_time=start_dt_for_each_week,
+						end_time=end_dt_for_each_week,
+						session_type=get_session,
+						zoom_link=''
+					)
+
+				appointments = [
+					getAppointmentsForTherapist(i)
+					for i in range(int(cacheData['number_of_appointments']))
+				]
+
+				for i in appointments:
+					i.patients.add(patientObject)
+
+				Appointment.objects.bulk_create(appointments)
+				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
+
+			Payment.object.create(
+				user=userObject,
+				payment_status=payment_status.upper(),
+				paymentID=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
+				session_type=get_session,
+				amount=get_session.get_display_price()
+			)
 
 	# Passed signature verification
 	return HttpResponse(status=200)
@@ -378,19 +434,4 @@ def sendMailToNewUser(patient_email, temp_pass):
 		recipient_list=[patient_email],
 		from_email=settings.EMAIL_HOST_USER
 	)
-	return
-
-def createSingleAppointmentWithDoctor(doctor, start_time, get_session, new_patient):
-	new_appointment = Appointment(
-		doctor=doctor,
-		start_time=new_start_time,
-		end_time=new_end_time,
-		session_type=get_session,
-		zoom_link=''
-		)
-	new_appointment.save()
-	new_appointment.patients.add(new_patient)
-	return
-
-def createSingleAppointmentWithTherapist():
 	return
