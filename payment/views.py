@@ -221,7 +221,7 @@ class CreateCheckoutSessionView(View):
 		therapy_session_id = self.kwargs["pk"]
 		session_type = Session.objects.get(id=therapy_session_id)
 		appointments = cache.get(self.request.session.session_key)
-		YOUR_DOMAIN = "http://127.0.0.1:8000"
+		YOUR_DOMAIN = "http://localhost:8000"
 		cacheData = cache.get(self.request.session.session_key)
 
 		checkout_session = stripe.checkout.Session.create(
@@ -296,119 +296,135 @@ def stripe_webhook(request):
 				doctor = Doctor.objects.get(id=cacheData['consultant_id'])
 				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
 				new_end_time = new_start_time + timedelta(minutes = int(duration))
-				appointments = [
-					Appointment(
+
+				app = Appointment(
 						doctor=doctor,
 						start_time=new_start_time,
 						end_time=new_end_time,
 						session_type=get_session,
-						zoom_link=''
+						zoom_link='',
 					)
-				]
-
-				for i in appointments:
-					i.patients.add(patientObject)
-
-				Appointment.objects.bulk_create(appointments)
+				app.save()
+				app.patients.add(patientObject)
 				# TODO: raise alert if there is more than one appointment exists for this doctor between the start time and end time. then send an email to the doctor.
 
 			elif cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'single-event':
 				therapist = Therapist.objects.get(id=cacheData['consultant_id'])
 				new_start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
 				new_end_time = new_start_time + timedelta(minutes = int(duration))
-				appointments = [
-					Appointment(
+
+				app = Appointment(
 						therapist=therapist,
 						start_time=new_start_time,
 						end_time=new_end_time,
 						session_type=get_session,
-						zoom_link=''
+						zoom_link='',
 					)
-				]
-				
-				for i in appointments:
-					i.patients.add(patientObject)
-
-				Appointment.objects.bulk_create(appointments)
+				app.save()
+				app.patients.add(patientObject)
 				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
 
 			elif cacheData['consultant'] == 'doctor' and cacheData['event_type'] == 'multiple-event':
 				doctor = Doctor.objects.get(id=cacheData['consultant_id'])
 				start_date_and_time = cacheData['start_time']
 
-				def getAppointmentsForDoctor( index ):
+				for i in range(int(cacheData['number_of_appointments'])):
 					new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
-					start_dt_for_each_week = new_start_time + timedelta(weeks = index)
 					end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
-					return Appointment(
+					start_dt_for_each_week = new_start_time + timedelta(weeks = i)
+
+					app = Appointment(
 						doctor=doctor,
 						start_time=start_dt_for_each_week,
 						end_time=end_dt_for_each_week,
 						session_type=get_session,
-						zoom_link=''
+						zoom_link='',
 					)
+					app.save()
+					app.patients.add(patientObject)
 
-				appointments = [
-					getAppointmentsForDoctor(i)
-					for i in range(int(cacheData['number_of_appointments']))
-				]
+				# def getAppointmentsForDoctor( index ):
+				# 	new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+				# 	start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+				# 	end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
+				# 	return Appointment(
+				# 		doctor=doctor,
+				# 		start_time=start_dt_for_each_week,
+				# 		end_time=end_dt_for_each_week,
+				# 		session_type=get_session,
+				# 		zoom_link='',
+				# 	)
 
-				for i in appointments:
-					i.patients.add(patientObject)
-
-				Appointment.objects.bulk_create(appointments)
+				# appointments = [
+				# 	getAppointmentsForDoctor(i)
+				# 	for i in range(int(cacheData['number_of_appointments']))
+				# ]
+				# Appointment.objects.bulk_create(appointments)
 				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
 
 			elif cacheData['consultant'] == 'therapist' and cacheData['event_type'] == 'multiple-event':
 				therapist = Therapist.objects.get(id=cacheData['consultant_id'])
 				start_date_and_time = cacheData['start_time']
 
-				def getAppointmentsForTherapist( index ):
+				for i in range(int(cacheData['number_of_appointments'])):
 					new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
 					start_dt_for_each_week = new_start_time + timedelta(weeks = index)
 					end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
-					return Appointment(
+
+					app = Appointment(
 						therapist=therapist,
 						start_time=start_dt_for_each_week,
 						end_time=end_dt_for_each_week,
 						session_type=get_session,
-						zoom_link=''
+						zoom_link='',
 					)
+					app.save()
+					app.patients.add(patientObject)
 
-				appointments = [
-					getAppointmentsForTherapist(i)
-					for i in range(int(cacheData['number_of_appointments']))
-				]
-
-				for i in appointments:
-					i.patients.add(patientObject)
-
-				Appointment.objects.bulk_create(appointments)
-				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
-
-			Payment.object.create(
+			pay = Payment(
 				user=userObject,
 				payment_status=payment_status.upper(),
 				paymentID=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
 				session_type=get_session,
 				amount=get_session.get_display_price()
 			)
+			pay.save()
+
+
+				# def getAppointmentsForTherapist( index ):
+				# 	new_start_time = datetime.strptime(start_date_and_time, '%Y-%m-%dT%H:%M:%S')
+				# 	start_dt_for_each_week = new_start_time + timedelta(weeks = index)
+				# 	end_dt_for_each_week = start_dt_for_each_week + timedelta(minutes = int(duration))
+				# 	return Appointment(
+				# 		therapist=therapist,
+				# 		start_time=start_dt_for_each_week,
+				# 		end_time=end_dt_for_each_week,
+				# 		session_type=get_session,
+				# 		zoom_link='',
+				# 	)
+
+				# appointments = [
+				# 	getAppointmentsForTherapist(i)
+				# 	for i in range(int(cacheData['number_of_appointments']))
+				# ]
+
+				# Appointment.objects.bulk_create(appointments)
+				# TODO: raise alert if there is more than one appointment exists for this therapist between the start time and end time. then send an email to the doctor.
 
 	# Passed signature verification
 	return HttpResponse(status=200)
 
 def createNewUser(patient_email, temp_pass):
-	new_user = User(
+	new_user = User.objects.create_user(
 		username=patient_email,
 		email=patient_email,
 		password=temp_pass,
 		)
-	new_user.save()
 	return new_user
 
 def createNewPatient(newUser):
 	new_patient = Patient(
-		user=new_user,
+		user=newUser,
 		date_of_birth=datetime.today().strftime('%Y-%m-%d')
 		)
 	new_patient.save()
