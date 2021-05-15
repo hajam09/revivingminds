@@ -1,73 +1,96 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Buy cool new product</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-  </head>
-  <body>
-    <section>
-      <div class="product">
-        
-        <div class="description">
-          {% if appointments %}
+{% extends "mainapp/base.html" %}
+{% load static %}
+{% block styling %}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="style.css">
+<script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}" />
+<style type="text/css">
+    .overlay {
+        height: 7%;
+    }
+    #articleBody p {
+        text-align: justify;
+    }
+    .card img {
+        height: auto;
+        width: auto;
+        object-fit: contain;
+    }
+</style>
+<main>
+    <section class="overview-wrap" id="overview">
+        <div class="container">
+            <div class="contenedor">
+                <div class="row" style="margin-left: 0px;">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            {% if appointments %}
 
-            {% for a in appointments %}
+                            <table class="table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">Session Name</th>
+                                        <th scope="col">Start Time</th>
+                                        <th scope="col">End Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in appointments %}
+                                    <tr>
+                                        <td>{{ appointments.0.session_type.session_name }}</td>
+                                        <td>{{a.start_time}}</td>
+                                        <td>{{a.end_time}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
 
-            <p>{{a.doctor.user.first_name}}</p>
-            <p>{{a.therapist.user.first_name}}</p>
-
-            <p>{{a.start_time}}</p>
-            <p>{{a.end_time}}</p>
-
-
-            {% endfor %}
-
-            {{ appointments.0.session_type.session_name }}
-            {{ appointments.0.session_type.cost }}
-            {{ appointments.0.session_type.id }}
-
-
-
-          {% endif %}
-
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <p>Total amount: <b style="font-size: 25px;">${{ appointments.0.session_type.get_display_price }}</b></p>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="checkout-button">Checkout</button>
+                        {% csrf_token %}
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <button type="button" id="checkout-button">Checkout</button>
     </section>
-    {% csrf_token %}
-  </body>
-  <script type="text/javascript">
-  	const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+</main>
+<script type="text/javascript">
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     // Create an instance of the Stripe object with your publishable API key
     var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
     var checkoutButton = document.getElementById("checkout-button");
 
     checkoutButton.addEventListener("click", function () {
-      fetch("{% url 'payment:create-checkout-session' appointments.0.session_type.id %}", {
-        method: "POST",
-        headers: {
-        	'X-CSRFToken': csrftoken
-        }
-      })
+        fetch("{% url 'payment:create-checkout-session' appointments.0.session_type.id %}", {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        })
         .then(function (response) {
-          return response.json();
+            return response.json();
         })
         .then(function (session) {
-          return stripe.redirectToCheckout({ sessionId: session.id });
+            return stripe.redirectToCheckout({ sessionId: session.id });
         })
         .then(function (result) {
-          // If redirectToCheckout fails due to a browser or network
-          // error, you should display the localized error message to your
-          // customer using error.message.
-          if (result.error) {
-            alert(result.error.message);
-          }
+            // If redirectToCheckout fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using error.message.
+            if (result.error) {
+                alert(result.error.message);
+            }
         })
         .catch(function (error) {
-          console.error("Error:", error);
+            console.error("Error:", error);
         });
     });
-  </script>
-</html>
+</script>
+{% endblock %}

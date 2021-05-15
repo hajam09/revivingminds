@@ -34,6 +34,11 @@
         <div class="container">
             <div class="contenedor">
                 <h4 class="title-overview wow fadeInUp" style="font-size: 30px;">Book Appointment</h4>
+                {% if messages %}
+                {% for message in messages %}
+                <div style="color: black; text-align: center;" class="alert alert-info" role="alert">{{message}}</div>
+                {% endfor %}
+                {% endif %}
                 <button type="button" id="modalTriggerButton" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" hidden></button>
                 <div class="row">
                     <div class="col-auto">
